@@ -238,6 +238,9 @@
                 <button onclick="switchTab('clientes')" class="sidebar-item w-full" id="btn-tab-clientes">
                     <i class="fas fa-users w-4"></i> Clientes
                 </button>
+                <button onclick="switchTab('facturas')" class="sidebar-item w-full" id="btn-tab-facturas">
+                    <i class="fas fa-file-invoice-dollar w-4"></i> Facturas
+                </button>
                 <button onclick="switchTab('branding')" class="sidebar-item w-full" id="btn-tab-branding">
                     <i class="fas fa-palette w-4"></i> Branding
                 </button>
@@ -427,6 +430,42 @@
                     </div>
                 </div>
 
+                <!-- ══ TAB: FACTURAS ══════════════════════════════════════ -->
+                <div id="tab-facturas" class="tab-content space-y-5">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 justify-between">
+                        <div>
+                            <h3 class="text-lg font-black text-[#0a0a0a] uppercase tracking-tight">Solicitudes de Factura</h3>
+                            <p class="text-sm text-gray-400 mt-0.5">Gestiona las solicitudes de facturación por cliente</p>
+                        </div>
+                        <div class="relative w-full sm:w-auto">
+                            <i class="fas fa-search absolute left-3.5 top-3 text-gray-400 text-sm"></i>
+                            <input type="text" id="facturasSearch" placeholder="Buscar por cliente o RFC..." oninput="filterFacturas()"
+                                class="bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00b4d8] w-full sm:w-72 font-semibold">
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-6 py-4">Fecha</th>
+                                        <th class="px-6 py-4">Cliente / Email</th>
+                                        <th class="px-6 py-4">Datos Fiscales</th>
+                                        <th class="px-6 py-4">Ticket</th>
+                                        <th class="px-6 py-4">Estado</th>
+                                        <th class="px-6 py-4">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="facturasTableBody" class="divide-y divide-gray-50">
+                                    <tr>
+                                        <td colspan="6" class="px-5 py-12 text-center text-gray-400"><i class="fas fa-spinner fa-spin text-2xl text-[#00b4d8]"></i></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ══ TAB: SECCIONES ══════════════════════════════════════ -->
                 <div id="tab-secciones" class="tab-content space-y-5">
                     <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 justify-between">
@@ -449,6 +488,27 @@
                             <p class="text-xs text-indigo-500 mt-0.5">Activa las secciones visibles en la tienda con el
                                 toggle. Para asignar productos a una sección, edita el producto y selecciona sus
                                 secciones en el formulario.</p>
+                        </div>
+                    </div>
+
+                    <!-- Toggle: Ver Todo el Catálogo -->
+                    <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 text-lg flex-shrink-0">
+                                    <i class="fas fa-th-large"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-sm text-gray-800">Botón "Ver Todo el Catálogo"</p>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">Muestra un botón en la tienda que abre el catálogo completo paginado</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span id="catalogBtnStatusLabel" class="text-[10px] font-black uppercase tracking-widest text-gray-300">Cargando...</span>
+                                <button id="catalogBtnToggle" onclick="toggleCatalogButton()" class="relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none bg-gray-200">
+                                    <span id="catalogBtnThumb" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 translate-x-0"></span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1578,6 +1638,34 @@
                                     <span class="wix-ctrl-label">Ocultar Footer Totalmente</span>
                                     <label class="wix-toggle">
                                         <input type="checkbox" id="tog-hideFooter" onchange="wixToggleChange('hideFooter',this.checked)">
+                                        <div class="wix-toggle-slider"></div>
+                                    </label>
+                                </div>
+                                <div class="wix-ctrl-row">
+                                    <span class="wix-ctrl-label">Botones estilo Píldora</span>
+                                    <label class="wix-toggle">
+                                        <input type="checkbox" id="tog-pillButtons" onchange="wixToggleChange('pillButtons',this.checked)">
+                                        <div class="wix-toggle-slider"></div>
+                                    </label>
+                                </div>
+                                <div class="wix-ctrl-row">
+                                    <span class="wix-ctrl-label">Búsqueda estilo Plano (Flat)</span>
+                                    <label class="wix-toggle">
+                                        <input type="checkbox" id="tog-flatSearch" onchange="wixToggleChange('flatSearch',this.checked)">
+                                        <div class="wix-toggle-slider"></div>
+                                    </label>
+                                </div>
+                                <div class="wix-ctrl-row">
+                                    <span class="wix-ctrl-label">Títulos de Producto Extra Gruesos</span>
+                                    <label class="wix-toggle">
+                                        <input type="checkbox" id="tog-boldTitles" onchange="wixToggleChange('boldTitles',this.checked)">
+                                        <div class="wix-toggle-slider"></div>
+                                    </label>
+                                </div>
+                                <div class="wix-ctrl-row">
+                                    <span class="wix-ctrl-label">Efecto Flotar Tarjeta (Hover)</span>
+                                    <label class="wix-toggle">
+                                        <input type="checkbox" id="tog-hoverLift" onchange="wixToggleChange('hoverLift',this.checked)">
                                         <div class="wix-toggle-slider"></div>
                                     </label>
                                 </div>
