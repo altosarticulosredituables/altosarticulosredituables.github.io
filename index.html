@@ -12,161 +12,538 @@
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap"
             rel="stylesheet">
         <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+            :root {
+                --sidebar-w: 260px;
+                --accent: #00b4d8;
+                --accent-dk: #0096b4;
+                --accent-glow: rgba(0, 180, 216, 0.18);
+                --sidebar-bg: #080f1d;
+                --sidebar-border: rgba(255,255,255,0.06);
+                --header-bg: #080f1d;
+                --surface: #ffffff;
+                --surface-2: #f8fafc;
+                --border: #e8edf4;
+                --text-primary: #0d1b2a;
+                --text-secondary: #64748b;
+                --text-muted: #94a3b8;
+                --radius-card: 18px;
+                --radius-btn: 12px;
+                --shadow-card: 0 2px 12px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
+                --shadow-card-hover: 0 12px 40px rgba(15,23,42,0.10), 0 4px 12px rgba(15,23,42,0.06);
+            }
+
             * {
-                font-family: 'Outfit', sans-serif;
+                font-family: 'Outfit', 'Inter', sans-serif;
                 box-sizing: border-box;
                 -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
 
             body {
-                background: #f1f5f9;
-                background-image: radial-gradient(circle at top, #ffffff 0%, #f1f5f9 100%);
-                color: #0f172a;
+                background: #eef2f7;
+                background-image:
+                    radial-gradient(ellipse at 20% 10%, rgba(0,180,216,0.05) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 90%, rgba(99,102,241,0.04) 0%, transparent 60%);
+                color: var(--text-primary);
+                min-height: 100vh;
             }
 
-            /* Scrollbar Minimalista y Elegante */
-            ::-webkit-scrollbar {
-                width: 6px;
-                height: 6px;
-            }
+            /* ─── Scrollbar ─────────────────────────────────── */
+            ::-webkit-scrollbar { width: 5px; height: 5px; }
+            ::-webkit-scrollbar-track { background: transparent; }
+            ::-webkit-scrollbar-thumb { background: #d1d9e6; border-radius: 8px; }
+            ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-            ::-webkit-scrollbar-track {
-                background: transparent;
-            }
-
-            ::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 10px;
-            }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: #94a3b8;
-            }
-
+            /* ─── Sidebar ────────────────────────────────────── */
+            /* Desktop: sidebar takes flex space with fixed width */
             #sidebar {
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
-                border-right: 1px solid rgba(255, 255, 255, 0.05);
-                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+                width: var(--sidebar-w);
+                min-width: var(--sidebar-w);
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                background: var(--sidebar-bg);
+                border-right: 1px solid var(--sidebar-border);
+                box-shadow: 4px 0 32px rgba(0,0,0,0.25);
+                overflow: hidden;
+                /* position is controlled by Tailwind: fixed on mobile, relative on md+ */
+            }
+
+            /* Mobile: sidebar is overlay-only, ZERO flex space */
+            @media (max-width: 767px) {
+                #sidebar {
+                    position: fixed !important;
+                    top: 0; left: 0; bottom: 0;
+                    width: 260px !important;
+                    min-width: 0 !important;
+                    z-index: 50;
+                }
+            }
+
+            #sidebar::before {
+                content: '';
+                position: absolute;
+                top: -160px;
+                left: -80px;
+                width: 320px;
+                height: 320px;
+                background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 65%);
+                pointer-events: none;
+                animation: sidebarGlow 8s ease-in-out infinite alternate;
+            }
+
+            @keyframes sidebarGlow {
+                from { opacity: 0.6; transform: translate(0, 0) scale(1); }
+                to   { opacity: 1;   transform: translate(20px, 30px) scale(1.1); }
+            }
+
+            /* Sidebar brand zone */
+            .sidebar-brand {
+                padding: 28px 24px 22px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border-bottom: 1px solid var(--sidebar-border);
+                position: relative;
+            }
+
+            .sidebar-logo-ring {
+                width: 68px;
+                height: 68px;
+                border-radius: 18px;
+                background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 14px;
+                box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.3);
+                overflow: hidden;
+                transition: box-shadow 0.3s;
+            }
+
+            .sidebar-logo-ring:hover {
+                box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(0,180,216,0.3);
+            }
+
+            .sidebar-title {
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.35em;
+                text-transform: uppercase;
+                color: #ffffff;
+                text-align: center;
+            }
+
+            .sidebar-subtitle {
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: rgba(148,163,184,0.7);
+                text-align: center;
+                margin-top: 4px;
+            }
+
+            /* Sidebar nav label */
+            .sidebar-section-label {
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.2em;
+                text-transform: uppercase;
+                color: rgba(100,116,139,0.6);
+                padding: 16px 20px 6px;
             }
 
             .sidebar-item {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 14px 20px;
+                gap: 11px;
+                padding: 11px 16px;
                 font-size: 13px;
                 font-weight: 600;
-                color: #94a3b8;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                text-transform: capitalize;
-                letter-spacing: 0.02em;
-                border-radius: 12px;
-                margin-bottom: 2px;
+                color: rgba(148,163,184,0.85);
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 11px;
+                margin: 1px 8px;
+                position: relative;
+                cursor: pointer;
+                border: 1px solid transparent;
+            }
+
+            .sidebar-item i {
+                width: 16px;
+                text-align: center;
+                font-size: 13px;
+                flex-shrink: 0;
+                transition: color 0.25s;
             }
 
             .sidebar-item.active {
                 color: #ffffff;
-                background: linear-gradient(90deg, rgba(0, 180, 216, 0.15) 0%, transparent 100%);
-                border-left: 3px solid #00b4d8;
-                box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05);
+                background: linear-gradient(90deg, rgba(0,180,216,0.18) 0%, rgba(0,180,216,0.05) 100%);
+                border-color: rgba(0,180,216,0.25);
+            }
+
+            .sidebar-item.active i { color: var(--accent); }
+
+            .sidebar-item.active::before {
+                content: '';
+                position: absolute;
+                left: -9px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 3px;
+                height: 60%;
+                background: var(--accent);
+                border-radius: 0 3px 3px 0;
+                box-shadow: 0 0 8px var(--accent);
             }
 
             .sidebar-item:not(.active):hover {
                 color: #ffffff;
-                background: rgba(255, 255, 255, 0.05);
-                transform: translateX(4px);
+                background: rgba(255,255,255,0.06);
+                border-color: rgba(255,255,255,0.06);
             }
 
-            /* Glassmorphism Cards */
+            .sidebar-item.special-item {
+                color: #f472b6 !important;
+            }
+            .sidebar-item.special-item:hover {
+                background: rgba(244,114,182,0.08) !important;
+                border-color: rgba(244,114,182,0.15) !important;
+            }
+            .sidebar-item.special-item.active {
+                background: rgba(244,114,182,0.12) !important;
+                border-color: rgba(244,114,182,0.2) !important;
+            }
+            .sidebar-item.special-item.active::before { background: #f472b6; box-shadow: 0 0 8px #f472b6; }
+
+            /* Sidebar footer */
+            .sidebar-footer {
+                padding: 16px 20px;
+                border-top: 1px solid var(--sidebar-border);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .sidebar-footer-badge {
+                font-size: 8px;
+                font-weight: 800;
+                letter-spacing: 0.2em;
+                text-transform: uppercase;
+                color: rgba(100,116,139,0.5);
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.06);
+                border-radius: 6px;
+                padding: 4px 8px;
+            }
+
+            .sidebar-status-dot {
+                width: 6px; height: 6px;
+                border-radius: 50%;
+                background: #22c55e;
+                box-shadow: 0 0 6px #22c55e;
+                animation: pulse-dot 2s ease-in-out infinite;
+            }
+
+            @keyframes pulse-dot {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.4; }
+            }
+
+            /* ─── Top Header ─────────────────────────────────── */
+            header#topbar {
+                height: 68px;
+                background: var(--header-bg);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 28px;
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                flex-shrink: 0;
+            }
+
+            .topbar-breadcrumb {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .topbar-page-title {
+                font-size: 12px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.25em;
+                color: #ffffff;
+            }
+
+            .topbar-separator {
+                color: rgba(255,255,255,0.15);
+                font-size: 14px;
+            }
+
+            .topbar-right {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .status-pill {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(34,197,94,0.1);
+                border: 1px solid rgba(34,197,94,0.2);
+                border-radius: 100px;
+                padding: 5px 12px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #4ade80;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .topbar-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                border: 2px solid rgba(255,255,255,0.1);
+                overflow: hidden;
+                transition: border-color 0.2s;
+                cursor: pointer;
+            }
+
+            .topbar-avatar:hover {
+                border-color: var(--accent);
+            }
+
+            /* ─── Cards / Stat Blocks ─────────────────────────── */
             .stat-card {
-                background: rgba(255, 255, 255, 0.8);
-                backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.5);
-                border-radius: 20px;
-                padding: 24px;
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-card);
+                padding: 22px 20px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--shadow-card);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .stat-card::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                opacity: 0;
+                transition: opacity 0.3s;
+                background: linear-gradient(135deg, rgba(0,180,216,0.03) 0%, rgba(99,102,241,0.03) 100%);
             }
 
             .stat-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-                border-color: rgba(59, 130, 246, 0.3);
+                transform: translateY(-3px) scale(1.005);
+                box-shadow: var(--shadow-card-hover);
+                border-color: rgba(0,180,216,0.25);
             }
+
+            .stat-card:hover::after { opacity: 1; }
+
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 13px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+
+            /* ─── Buttons ─────────────────────────────────────── */
+            .btn-primary {
+                background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dk) 100%);
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                padding: 11px 22px;
+                border-radius: var(--radius-btn);
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: all 0.25s ease;
+                box-shadow: 0 4px 14px rgba(0,180,216,0.35);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-primary::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(0,180,216,0.45);
+                filter: brightness(1.08);
+            }
+
+            .btn-primary:active { transform: translateY(0); }
 
             .btn-black {
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
                 color: #fff;
-                font-size: 13px;
-                font-weight: 600;
+                font-size: 12px;
+                font-weight: 700;
                 letter-spacing: 0.05em;
-                padding: 12px 24px;
-                transition: all 0.3s ease;
-                display: flex;
+                text-transform: uppercase;
+                padding: 11px 22px;
+                transition: all 0.25s ease;
+                display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: var(--radius-btn);
+                box-shadow: 0 4px 12px rgba(15,23,42,0.25);
+                border: 1px solid rgba(255,255,255,0.08);
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-black::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
             }
 
             .btn-black:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+                box-shadow: 0 8px 22px rgba(15,23,42,0.35);
             }
 
+            /* ─── Tables ──────────────────────────────────────── */
             .table-header {
-                background: #f8fafc;
-                border-bottom: 2px solid #e2e8f0;
-                font-size: 11px;
-                font-weight: 700;
+                background: #f1f5f9;
+                border-bottom: 1px solid var(--border);
+                font-size: 10px;
+                font-weight: 800;
                 text-transform: uppercase;
-                letter-spacing: 0.05em;
+                letter-spacing: 0.1em;
                 color: #64748b;
             }
 
-            .modal-box {
-                border-radius: 24px;
-                background: #ffffff;
-                border: 1px solid rgba(0, 0, 0, 0.05);
-                box-shadow: 0 40px 80px rgba(0, 0, 0, 0.12);
+            .table-header th {
+                padding: 14px 20px;
+                white-space: nowrap;
             }
 
+            table tbody tr {
+                transition: background 0.15s;
+            }
+
+            table tbody tr:hover {
+                background: #f8fafc;
+            }
+
+            /* ─── Modal ───────────────────────────────────────── */
+            .modal-box {
+                border-radius: 22px;
+                background: #ffffff;
+                border: 1px solid rgba(0,0,0,0.04);
+                box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.06);
+            }
+
+            .modal-header {
+                padding: 24px 28px 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 18px;
+                margin-bottom: 0;
+            }
+
+            .modal-header h2 {
+                font-size: 15px;
+                font-weight: 800;
+                color: var(--text-primary);
+                letter-spacing: -0.01em;
+            }
+
+            .modal-close-btn {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: var(--surface-2);
+                border: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-secondary);
+                transition: all 0.2s;
+                cursor: pointer;
+                font-size: 13px;
+            }
+
+            .modal-close-btn:hover {
+                background: #fee2e2;
+                border-color: #fca5a5;
+                color: #ef4444;
+            }
+
+            /* ─── Toast ───────────────────────────────────────── */
             .toast {
                 position: fixed;
                 top: -100px;
                 left: 50%;
                 transform: translateX(-50%);
-                border-radius: 16px;
-                background: rgba(15, 23, 42, 0.95);
-                backdrop-filter: blur(8px);
+                border-radius: 14px;
+                background: rgba(8,15,29,0.96);
+                backdrop-filter: blur(12px);
                 color: #fff;
-                padding: 16px 24px;
+                padding: 14px 22px;
                 font-size: 13px;
                 font-weight: 600;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06) inset;
                 z-index: 9999;
                 opacity: 0;
                 pointer-events: none;
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 200px;
+                justify-content: center;
             }
 
             .toast.show {
-                top: 24px;
+                top: 22px;
                 opacity: 1;
             }
 
+            /* ─── Forms ───────────────────────────────────────── */
             input:not([type=color]):not([type=range]),
             select,
             textarea {
-                border-radius: 12px !important;
-                border: 1px solid #e2e8f0 !important;
-                padding: 12px 16px !important;
-                font-size: 14px !important;
-                transition: all 0.3s ease !important;
+                border-radius: 11px !important;
+                border: 1.5px solid #e2e8f0 !important;
+                padding: 11px 14px !important;
+                font-size: 13.5px !important;
+                font-weight: 500 !important;
+                transition: all 0.25s ease !important;
                 background: #f8fafc !important;
+                color: #0d1b2a !important;
             }
 
             input[type=color] { padding: 0 !important; border: none !important; background: transparent !important; }
@@ -176,32 +553,549 @@
             select:focus,
             textarea:focus {
                 background: #ffffff !important;
-                border-color: #3b82f6 !important;
-                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+                border-color: var(--accent) !important;
+                box-shadow: 0 0 0 3.5px rgba(0,180,216,0.12) !important;
                 outline: none !important;
             }
 
+            label.field-label {
+                display: block;
+                font-size: 10.5px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                color: #475569;
+                margin-bottom: 6px;
+            }
+
+            /* ─── Upload zone ─────────────────────────────────── */
+            .upload-zone {
+                border: 2px dashed #d1d9e6;
+                background: #f8fafc;
+                border-radius: 14px;
+                transition: all 0.25s;
+                cursor: pointer;
+            }
+
+            .upload-zone:hover {
+                border-color: var(--accent);
+                background: rgba(0,180,216,0.04);
+            }
+
+            /* ─── Section title inside tabs ───────────────────── */
+            .tab-section-title {
+                font-size: 18px;
+                font-weight: 900;
+                color: var(--text-primary);
+                letter-spacing: -0.02em;
+                line-height: 1.2;
+            }
+
+            .tab-section-desc {
+                font-size: 13px;
+                color: var(--text-muted);
+                margin-top: 3px;
+            }
+
+            /* ─── Panels / white cards ────────────────────────── */
+            .panel {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-card);
+                box-shadow: var(--shadow-card);
+                overflow: hidden;
+            }
+
+            /* ─── Info banners ────────────────────────────────── */
+            .info-banner {
+                border-radius: 14px;
+                padding: 14px 16px;
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .info-banner .info-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 9px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 13px;
+                flex-shrink: 0;
+            }
+
+            /* ─── Tab content anim ────────────────────────────── */
             .tab-content {
                 display: none;
-                animation: fadeIn 0.4s ease forwards;
+                animation: tabFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             }
 
-            .tab-content.active {
-                display: block;
+            .tab-content.active { display: block; }
+
+            @keyframes tabFadeIn {
+                from { opacity: 0; transform: translateY(14px); }
+                to   { opacity: 1; transform: translateY(0); }
             }
 
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
+            /* ─── Toggle switch ───────────────────────────────── */
+            .toggle-track {
+                width: 42px;
+                height: 24px;
+                border-radius: 100px;
+                background: #e2e8f0;
+                position: relative;
+                transition: background 0.22s;
+                cursor: pointer;
+                border: none;
+                flex-shrink: 0;
+            }
+
+            .toggle-track.on { background: var(--accent); }
+
+            .toggle-thumb {
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: #fff;
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+            }
+
+            .toggle-track.on .toggle-thumb { transform: translateX(18px); }
+
+            /* ─── Badge chips ─────────────────────────────────── */
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 3px 9px;
+                border-radius: 100px;
+                letter-spacing: 0.03em;
+            }
+
+            .badge-green  { background: #dcfce7; color: #16a34a; }
+            .badge-yellow { background: #fef9c3; color: #a16207; }
+            .badge-red    { background: #fee2e2; color: #dc2626; }
+            .badge-blue   { background: #dbeafe; color: #2563eb; }
+            .badge-gray   { background: #f1f5f9; color: #64748b; }
+            .badge-cyan   { background: rgba(0,180,216,0.10); color: var(--accent-dk); }
+
+            /* ═══════════════════════════════════════════════════
+               ✦  DINAMISMO  –  Animaciones & Micro-interacciones
+            ═══════════════════════════════════════════════════ */
+
+            /* ── Gradiente aurora animado en sidebar ── */
+            #sidebar::after {
+                content: '';
+                position: absolute;
+                bottom: -100px;
+                right: -80px;
+                width: 260px;
+                height: 260px;
+                background: radial-gradient(circle, rgba(99,102,241,0.09) 0%, transparent 65%);
+                pointer-events: none;
+                animation: auroraShift 10s ease-in-out infinite alternate;
+            }
+
+            @keyframes auroraShift {
+                0%   { transform: translate(0,0) scale(1); opacity:0.5; }
+                33%  { transform: translate(-20px,-30px) scale(1.15); opacity:0.9; }
+                66%  { transform: translate(20px,10px) scale(0.9); opacity:0.6; }
+                100% { transform: translate(-10px,20px) scale(1.1); opacity:0.8; }
+            }
+
+            /* ── Header con línea de acento animada ── */
+            header#topbar {
+                position: relative;
+            }
+
+            header#topbar::after {
+                content: '';
+                position: absolute;
+                bottom: 0; left: 0; right: 0;
+                height: 2px;
+                background: linear-gradient(90deg,
+                    transparent 0%,
+                    var(--accent) 30%,
+                    rgba(99,102,241,0.8) 60%,
+                    transparent 100%
+                );
+                background-size: 200% 100%;
+                animation: headerLine 4s linear infinite;
+            }
+
+            @keyframes headerLine {
+                0%   { background-position: -100% 0; }
+                100% { background-position: 200% 0; }
+            }
+
+            /* ── Scanner line en header ── */
+            .header-scanner {
+                position: absolute;
+                left: 0; top: 0;
+                width: 2px; height: 100%;
+                background: linear-gradient(180deg, transparent, var(--accent), transparent);
+                opacity: 0.4;
+                animation: scannerY 3s ease-in-out infinite;
+            }
+
+            @keyframes scannerY {
+                0%   { left: 0%; opacity: 0; }
+                10%  { opacity: 0.5; }
+                90%  { opacity: 0.5; }
+                100% { left: 100%; opacity: 0; }
+            }
+
+            /* ── Shimmer en stat cards al cargar ── */
+            @keyframes shimmerMove {
+                0%   { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+
+            .stat-card-shimmer {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .stat-card-shimmer::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(255,255,255,0.7) 50%,
+                    transparent 100%
+                );
+                transform: translateX(-100%);
+                animation: shimmerMove 1.8s ease-in-out infinite;
+            }
+
+            /* ── Stat card numero con counter-up ── */
+            .stat-number {
+                transition: all 0.6s cubic-bezier(0.34,1.56,0.64,1);
+            }
+
+            /* ── Hover flotante en stat cards ── */
+            .stat-card {
+                animation: cardEntry 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+            }
+
+            .stat-card:nth-child(1) { animation-delay: 0.05s; }
+            .stat-card:nth-child(2) { animation-delay: 0.1s; }
+            .stat-card:nth-child(3) { animation-delay: 0.15s; }
+            .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+            @keyframes cardEntry {
+                from { opacity: 0; transform: translateY(20px) scale(0.95); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+
+            /* ── Ripple en botones ── */
+            .btn-primary, .btn-black {
+                position: relative;
+                isolation: isolate;
+            }
+
+            .ripple-effect {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.35);
+                transform: scale(0);
+                animation: rippleAnim 0.55s linear;
+                pointer-events: none;
+            }
+
+            @keyframes rippleAnim {
+                to { transform: scale(4); opacity: 0; }
+            }
+
+            /* ── Sidebar nav item: barra glow activa y entrada ── */
+            .sidebar-item {
+                animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            }
+
+            .sidebar-item:nth-child(1)  { animation-delay: 0.04s; }
+            .sidebar-item:nth-child(2)  { animation-delay: 0.08s; }
+            .sidebar-item:nth-child(3)  { animation-delay: 0.12s; }
+            .sidebar-item:nth-child(4)  { animation-delay: 0.16s; }
+            .sidebar-item:nth-child(5)  { animation-delay: 0.20s; }
+            .sidebar-item:nth-child(6)  { animation-delay: 0.24s; }
+            .sidebar-item:nth-child(7)  { animation-delay: 0.28s; }
+            .sidebar-item:nth-child(8)  { animation-delay: 0.32s; }
+            .sidebar-item:nth-child(9)  { animation-delay: 0.36s; }
+            .sidebar-item:nth-child(10) { animation-delay: 0.40s; }
+
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateX(-14px); }
+                to   { opacity: 1; transform: translateX(0); }
+            }
+
+            .sidebar-item.active {
+                box-shadow:
+                    inset 0 0 0 1px rgba(0,180,216,0.25),
+                    0 0 12px rgba(0,180,216,0.10) !important;
+            }
+
+            /* ── Luz spot en hover de sidebar item ── */
+            .sidebar-item:not(.active):hover::after {
+                content:'';
+                position: absolute;
+                inset: 0;
+                border-radius: 11px;
+                background: radial-gradient(ellipse at 30% 50%, rgba(0,180,216,0.08) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            /* ── Background body: grid sutil animado ── */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(0,180,216,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,180,216,0.03) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+                z-index: 0;
+                animation: gridDrift 20s linear infinite;
+            }
+
+            @keyframes gridDrift {
+                from { background-position: 0 0; }
+                to   { background-position: 40px 40px; }
+            }
+
+            /* ── Asegura que el contenido va encima del grid ── */
+            .flex.h-screen { position: relative; z-index: 1; }
+
+            /* ── Glow en el botón primary al hover ── */
+            .btn-primary:hover::after {
+                content: '';
+                position: absolute;
+                inset: -4px;
+                border-radius: inherit;
+                background: var(--accent);
+                filter: blur(14px);
+                opacity: 0.3;
+                z-index: -1;
+                animation: glowPulse 1.2s ease-in-out infinite alternate;
+            }
+
+            @keyframes glowPulse {
+                from { opacity: 0.2; }
+                to   { opacity: 0.5; }
+            }
+
+            /* ── Contenido scrollable: entrada suave ── */
+            .tab-content.active > * {
+                animation: contentRow 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+
+            .tab-content.active > *:nth-child(1) { animation-delay: 0.00s; }
+            .tab-content.active > *:nth-child(2) { animation-delay: 0.06s; }
+            .tab-content.active > *:nth-child(3) { animation-delay: 0.12s; }
+            .tab-content.active > *:nth-child(4) { animation-delay: 0.18s; }
+            .tab-content.active > *:nth-child(5) { animation-delay: 0.24s; }
+
+            @keyframes contentRow {
+                from { opacity: 0; transform: translateY(12px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            /* ── Logo ring: latido sutil ── */
+            .sidebar-logo-ring {
+                animation: logoBeat 4s ease-in-out infinite;
+            }
+
+            @keyframes logoBeat {
+                0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.3); }
+                50%      { box-shadow: 0 0 0 2px rgba(0,180,216,0.4),   0 8px 28px rgba(0,180,216,0.2); }
+            }
+
+            /* ── Status dot: respira ── */
+            .sidebar-status-dot {
+                animation: breathe 2.5s ease-in-out infinite !important;
+            }
+
+            @keyframes breathe {
+                0%, 100% { transform: scale(1);   box-shadow: 0 0 4px #22c55e; }
+                50%      { transform: scale(1.4);  box-shadow: 0 0 10px #22c55e, 0 0 20px rgba(34,197,94,0.3); }
+            }
+
+            /* ── Topbar avatar: giro suave al haber hover ── */
+            .topbar-avatar img {
+                transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            }
+
+            .topbar-avatar:hover img {
+                transform: rotate(6deg) scale(1.08);
+            }
+
+            /* ── Tab section title: underline animado ── */
+            .tab-section-title {
+                position: relative;
+                display: inline-block;
+            }
+
+            .tab-section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -4px; left: 0;
+                width: 0; height: 2px;
+                background: linear-gradient(90deg, var(--accent), rgba(99,102,241,0.6));
+                border-radius: 2px;
+                animation: titleUnderline 0.5s 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
+            }
+
+            @keyframes titleUnderline {
+                to { width: 100%; }
+            }
+
+            /* ── Toast: icono pulsante ── */
+            .toast i {
+                animation: iconPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            }
+
+            @keyframes iconPop {
+                from { transform: scale(0); }
+                to   { transform: scale(1); }
+            }
+
+            /* ── Panel hover: sutil levitación ── */
+            .panel {
+                transition: box-shadow 0.3s, transform 0.3s;
+            }
+            .panel:hover {
+                box-shadow: 0 8px 32px rgba(15,23,42,0.09);
+                transform: translateY(-1px);
+            }
+
+            /* ── Spinner global mejorado ── */
+            .fa-spin {
+                color: var(--accent) !important;
+            }
+
+            /* ── Tables: row highlight left bar ── */
+            table tbody tr:hover td:first-child {
+                border-left: 2px solid var(--accent);
+            }
+
+            table tbody tr td {
+                border-left: 2px solid transparent;
+                transition: border-left-color 0.2s;
+            }
+
+            /* ── Animated gradient page background ── */
+            @keyframes bgFloat {
+                0%,100% { background-position: 0% 0%, 100% 100%; }
+                50%      { background-position: 100% 0%, 0% 100%; }
+            }
+
+            body {
+                animation: bgFloat 20s ease-in-out infinite;
+                background-size: 200% 200%, 200% 200%;
+            }
+            /* ══ RESPONSIVE MÓVIL ═══════════════════════════════════════ */
+            @media (max-width: 767px) {
+                /* Main content: 100% width since sidebar is fixed/overlay */
+                main {
+                    width: 100vw !important;
+                    min-width: 0 !important;
+                    overflow-x: hidden;
                 }
 
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
+                /* Topbar: compacto */
+                header#topbar {
+                    padding: 0 12px !important;
+                    height: 52px !important;
                 }
+
+                #pageTitle {
+                    font-size: 13px !important;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 150px;
+                }
+
+                /* Ocultar elementos del topbar en móvil */
+                .topbar-right .status-pill,
+                .topbar-separator { display: none !important; }
+
+                /* Stat cards: columna única */
+                .grid.grid-cols-2,
+                .grid.grid-cols-3,
+                .grid.grid-cols-4,
+                .sm\:grid-cols-2,
+                .lg\:grid-cols-3,
+                .lg\:grid-cols-4 {
+                    grid-template-columns: 1fr !important;
+                }
+                
+                /* Stats row: allow 2 columns for smaller cards if they fit */
+                #tab-productos .grid.grid-cols-2 {
+                    grid-template-columns: 1fr 1fr !important;
+                }
+
+                /* Tabla horizontal scroll */
+                .overflow-x-auto {
+                    overflow-x: auto !important;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                /* Modal scroll interno */
+                .modal-box {
+                    max-height: 92dvh !important;
+                    overflow-y: auto !important;
+                    margin: 0 8px !important;
+                }
+
+                /* Boton primary más compacto */
+                .btn-primary {
+                    font-size: 11px !important;
+                    padding: 8px 14px !important;
+                    white-space: nowrap;
+                }
+
+                /* Ubicaciones: 1 col */
+                #ubicacionesList {
+                    grid-template-columns: 1fr !important;
+                }
+
+                /* Nosotros editor: full width */
+                .grid.grid-cols-1.lg\:grid-cols-3 {
+                    grid-template-columns: 1fr !important;
+                }
+
+                /* Panels: sin transform hover en touch */
+                .panel:hover {
+                    transform: none !important;
+                    box-shadow: var(--shadow-card) !important;
+                }
+
+                /* Tab content padding */
+                .tab-content {
+                    padding-bottom: 80px;
+                }
+            }
+
+            /* Tablet 768-1024 */
+            @media (min-width: 768px) and (max-width: 1024px) {
+                #sidebar {
+                    width: 220px !important;
+                    min-width: 220px !important;
+                }
+                .sidebar-title { font-size: 12px !important; }
             }
         </style>
+
     </head>
 
     <body class="min-h-screen">
@@ -218,54 +1112,70 @@
 
             <!-- ── SIDEBAR ──────────────────────────────────────────────────── -->
             <aside id="sidebar"
-                class="w-72 flex-shrink-0 flex flex-col h-full fixed md:relative z-50 transform -translate-x-full md:translate-x-0">
-                <div class="px-8 py-10 flex flex-col items-center border-b border-white/5">
-                    <div class="h-20 w-20 bg-white p-2 rounded-xl mb-6 flex items-center justify-center">
-                        <img id="adminSidebarLogo" src="../store/public/media__1773555188977.png" alt="Altos Logo" class="h-full w-full object-contain"
+                class="flex-shrink-0 flex flex-col h-full fixed md:relative z-50 transform -translate-x-full md:translate-x-0">
+
+                <!-- Brand -->
+                <div class="sidebar-brand">
+                    <div class="sidebar-logo-ring">
+                        <img id="adminSidebarLogo" src="../store/public/media__1773555188977.png" alt="Altos Logo" class="w-full h-full object-contain p-1.5"
                             onerror="this.src='../logo articulos redituables altos.jpg'">
                     </div>
-                    <h1 class="text-[10px] font-black tracking-[0.4em] uppercase text-white text-center italic">Altos
-                        Artículos</h1>
-                    <p class="text-[8px] font-bold tracking-[0.2em] text-gray-500 uppercase mt-2 text-center">Sistema de Inventario y Gestión</p>
+                    <p class="sidebar-title">Altos Artículos</p>
+                    <p class="sidebar-subtitle">Inventario &amp; Gestión</p>
                 </div>
-                <nav class="flex-1 px-4 py-8 space-y-1 overflow-y-auto">
+
+                <!-- Nav -->
+                <nav class="flex-1 py-4 overflow-y-auto">
+                    <p class="sidebar-section-label">Principal</p>
                     <button onclick="switchTab('productos')" class="sidebar-item w-full active" id="btn-tab-productos">
-                        <i class="fas fa-box w-4"></i> Productos
+                        <i class="fas fa-box"></i> Productos
                     </button>
                     <button onclick="switchTab('pedidos')" class="sidebar-item w-full" id="btn-tab-pedidos">
-                        <i class="fas fa-shopping-bag w-4"></i> Pedidos
-                    </button>
-                    <button onclick="switchTab('secciones')" class="sidebar-item w-full" id="btn-tab-secciones">
-                        <i class="fas fa-layer-group w-4"></i> Secciones
+                        <i class="fas fa-shopping-bag"></i> Pedidos
                     </button>
                     <button onclick="switchTab('clientes')" class="sidebar-item w-full" id="btn-tab-clientes">
-                        <i class="fas fa-users w-4"></i> Clientes
+                        <i class="fas fa-users"></i> Clientes
                     </button>
                     <button onclick="switchTab('facturas')" class="sidebar-item w-full" id="btn-tab-facturas">
-                        <i class="fas fa-file-invoice-dollar w-4"></i> Facturas
+                        <i class="fas fa-file-invoice-dollar"></i> Facturas
                     </button>
-                    <button onclick="switchTab('branding')" class="sidebar-item w-full" id="btn-tab-branding">
-                        <i class="fas fa-palette w-4"></i> Branding
+
+                    <p class="sidebar-section-label" style="margin-top:8px">Tienda</p>
+                    <button onclick="switchTab('secciones')" class="sidebar-item w-full" id="btn-tab-secciones">
+                        <i class="fas fa-layer-group"></i> Secciones
                     </button>
                     <button onclick="switchTab('carrusel')" class="sidebar-item w-full" id="btn-tab-carrusel">
-                        <i class="fas fa-images w-4"></i> Carrusel Hero
+                        <i class="fas fa-images"></i> Carrusel Hero
                     </button>
                     <button onclick="switchTab('bodysection')" class="sidebar-item w-full" id="btn-tab-bodysection">
-                        <i class="fas fa-image w-4"></i> Imágenes Body Section
+                        <i class="fas fa-image"></i> Imágenes Body
                     </button>
                     <button onclick="switchTab('prefooter')" class="sidebar-item w-full" id="btn-tab-prefooter">
-                        <i class="fas fa-layer-group w-4"></i> Images Before Footer
+                        <i class="fas fa-photo-film"></i> Pre-Footer
                     </button>
-                    <button onclick="switchTab('editor-visual')" class="sidebar-item w-full !text-[#E91E63] hover:!bg-[#E91E63]/10" id="btn-tab-editor-visual">
-                        <i class="fas fa-paint-roller w-4"></i> Editor Visual (Live)
+                    <button onclick="switchTab('ubicaciones')" class="sidebar-item w-full" id="btn-tab-ubicaciones">
+                        <i class="fas fa-map-marker-alt"></i> Ubicaciones
+                    </button>
+                    <button onclick="switchTab('nosotros')" class="sidebar-item w-full" id="btn-tab-nosotros">
+                        <i class="fas fa-building"></i> Nuestra Empresa
+                    </button>
+
+                    <p class="sidebar-section-label" style="margin-top:8px">Diseño</p>
+                    <button onclick="switchTab('branding')" class="sidebar-item w-full" id="btn-tab-branding">
+                        <i class="fas fa-palette"></i> Branding
+                    </button>
+                    <button onclick="switchTab('editor-visual')" class="sidebar-item special-item w-full" id="btn-tab-editor-visual">
+                        <i class="fas fa-paint-roller"></i> Editor Visual Live
                     </button>
                     <button onclick="switchTab('config')" class="sidebar-item w-full" id="btn-tab-config">
-                        <i class="fas fa-cog w-4"></i> Configuración
+                        <i class="fas fa-cog"></i> Configuración
                     </button>
                 </nav>
-                <div
-                    class="p-8 border-t border-white/5 text-[9px] font-black text-white/40 tracking-widest uppercase text-center">
-                    FASE BETA 2026
+
+                <!-- Footer -->
+                <div class="sidebar-footer">
+                    <div class="sidebar-status-dot"></div>
+                    <span class="sidebar-footer-badge">Beta · 2026</span>
                 </div>
             </aside>
 
@@ -273,24 +1183,26 @@
             <main class="flex-1 flex flex-col overflow-hidden">
 
                 <!-- Top Bar -->
-                <header
-                    class="h-24 bg-[#020617] flex items-center justify-between px-8 md:px-12 flex-shrink-0 border-b border-white/5 shadow-sm relative z-10">
-                    <div class="flex items-center gap-6">
+                <header id="topbar">
+                    <div class="header-scanner"></div>
+                    <div class="topbar-breadcrumb">
                         <button onclick="toggleSidebar()"
-                            class="md:hidden text-white hover:text-gray-400 transition-colors">
-                            <i class="fas fa-bars text-xl"></i>
+                            class="md:hidden text-white hover:text-gray-400 transition-colors mr-2">
+                            <i class="fas fa-bars"></i>
                         </button>
-                        <h2 id="pageTitle" class="text-sm font-black text-white uppercase tracking-[0.3em]">
-                            Overview</h2>
+                        <span class="topbar-separator hidden sm:inline">&#8212;</span>
+                        <h2 id="pageTitle" class="topbar-page-title">Productos</h2>
                     </div>
-                    <div class="flex items-center gap-8">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-[9px] font-black text-gray-300 uppercase tracking-widest">Network Status</p>
-                            <p id="cloudinaryBadge" class="text-[10px] text-green-500 font-black uppercase">Online · Secure
-                            </p>
+                    <div class="topbar-right">
+                        <span id="adminClock" class="hidden sm:block" style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:0.1em;font-variant-numeric:tabular-nums"></span>
+                        <div class="status-pill hidden sm:flex">
+                            <span id="topbarStatusDot" style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;display:inline-block"></span>
+                            <span id="cloudinaryBadge">Online · Seguro</span>
                         </div>
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=000&color=fff&bold=true"
-                            class="h-12 w-12 grayscale border border-gray-100">
+                        <div class="topbar-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=080f1d&color=ffffff&bold=true&size=72"
+                                style="width:100%;height:100%;object-fit:cover">
+                        </div>
                     </div>
                 </header>
 
@@ -465,6 +1377,168 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ══ TAB: UBICACIONES ══════════════════════════════════════ -->
+                    <div id="tab-ubicaciones" class="tab-content space-y-5">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 justify-between">
+                            <div>
+                                <h3 class="text-lg font-black text-[#0a0a0a] uppercase tracking-tight">Nuestras Ubicaciones</h3>
+                                <p class="text-sm text-gray-400 mt-0.5">Administra las sucursales y puntos de venta que aparecen en la tienda</p>
+                            </div>
+                            <button onclick="openUbicacionModal()" class="btn-primary flex items-center gap-2">
+                                <i class="fas fa-plus"></i> Agregar Ubicación
+                            </button>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600 text-sm">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-black text-blue-700">¿Cómo funciona?</p>
+                                <p class="text-xs text-blue-600 mt-0.5">Agrega un nombre, dirección y link de Google Maps (embed URL). Los clientes podrán ver las sucursales con mapas interactivos desde la tienda.</p>
+                            </div>
+                        </div>
+
+                        <div id="ubicacionesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="col-span-2 text-center py-12 text-gray-400">
+                                <i class="fas fa-spinner fa-spin text-2xl text-[#00b4d8]"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ══ TAB: NOSOTROS ══════════════════════════════════════ -->
+                    <div id="tab-nosotros" class="tab-content space-y-5">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 justify-between">
+                            <div>
+                                <h3 class="text-lg font-black text-[#0a0a0a] uppercase tracking-tight">Nuestra Empresa</h3>
+                                <p class="text-sm text-gray-400 mt-0.5">Edita el contenido de la sección "Quiénes Somos" que ven los clientes en la tienda</p>
+                            </div>
+                            <button onclick="saveNosotros()" class="btn-primary flex items-center gap-2">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                            <!-- Editor -->
+                            <div class="lg:col-span-2 space-y-4">
+                                <div class="panel p-5 space-y-4">
+                                    <h4 class="text-sm font-black text-gray-700 uppercase tracking-wider">Información General</h4>
+                                    
+                                    <!-- Imagen de Nosotros -->
+                                    <div class="mb-4">
+                                        <label class="block text-xs font-black text-gray-500 mb-2 uppercase tracking-wider">Imagen de Portada (Nosotros)</label>
+                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                            <div class="relative w-full sm:w-48 h-32 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden group">
+                                                <img id="nosotrosImgPreview" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                                                <div id="nosotrosImgPlaceholder" class="text-center">
+                                                    <i class="fas fa-image text-2xl text-gray-400 mb-1 block"></i>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase">Sin Imagen</span>
+                                                </div>
+                                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onclick="window.openCloudinaryWidget('nosotros')" class="cursor-pointer bg-white text-gray-900 text-[10px] font-black uppercase px-3 py-1.5 rounded-lg hover:scale-105 transition-transform">
+                                                        Cambiar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-[11px] text-gray-500 font-medium leading-relaxed mb-2">
+                                                    Sube una imagen representativa de tu empresa. Aparecerá en la sección "Nuestra Empresa" de tu tienda virtual.
+                                                </p>
+                                                <p class="text-[10px] text-gray-400 font-bold mb-3">Recomendado: 800x600px o formato horizontal.</p>
+                                                <div class="flex gap-2">
+                                                    <button onclick="window.openCloudinaryWidget('nosotros')" class="cursor-pointer text-xs font-black bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-xl transition inline-block">
+                                                        <i class="fas fa-upload mr-1"></i> Seleccionar Imagen
+                                                    </button>
+                                                    <button onclick="window.removeNosotrosImage()" id="btnRemoveNosotrosImg" class="hidden text-xs font-black bg-red-50 text-red-500 hover:bg-red-100 px-4 py-2 rounded-xl transition">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="h-px bg-gray-100 w-full my-2"></div>
+
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Nombre / Título de la empresa</label>
+                                        <input type="text" id="nosotrosTitulo" placeholder="Ej. Altos Artículos — Mayorista de Confianza"
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Subtítulo / Lema</label>
+                                        <input type="text" id="nosotrosLema" placeholder="Ej. Calidad y precio en cada producto"
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Descripción / Historia</label>
+                                        <textarea id="nosotrosDescripcion" rows="5" placeholder="Cuéntale a tus clientes quiénes son, su historia, misión..."
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] resize-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Misión</label>
+                                        <textarea id="nosotrosMision" rows="3" placeholder="Nuestra misión es..."
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] resize-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Visión</label>
+                                        <textarea id="nosotrosVision" rows="3" placeholder="Nuestra visión es..."
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] resize-none"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="panel p-5 space-y-4">
+                                    <h4 class="text-sm font-black text-gray-700 uppercase tracking-wider">Datos de Contacto</h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Teléfono / WhatsApp</label>
+                                            <input type="text" id="nosotrosTelefono" placeholder="+52 55 1234 5678"
+                                                class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Email de contacto</label>
+                                            <input type="email" id="nosotrosEmail" placeholder="contacto@empresa.com"
+                                                class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Instagram</label>
+                                            <input type="text" id="nosotrosInstagram" placeholder="@altosarticulos"
+                                                class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-gray-500 mb-1 uppercase tracking-wider">Facebook</label>
+                                            <input type="text" id="nosotrosFacebook" placeholder="facebook.com/altosarticulos"
+                                                class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel p-5 space-y-4">
+                                    <h4 class="text-sm font-black text-gray-700 uppercase tracking-wider">Estadísticas / Valores</h4>
+                                    <p class="text-xs text-gray-400">Ej: 10+ años de experiencia, 500+ clientes, etc.</p>
+                                    <div id="nosotrosValoresContainer" class="space-y-2"></div>
+                                    <button onclick="addNosotrosValor()" class="text-xs font-black text-[#00b4d8] hover:text-[#0096b4] flex items-center gap-1 transition">
+                                        <i class="fas fa-plus"></i> Agregar estadística
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Preview Card -->
+                            <div class="space-y-4">
+                                <div class="panel p-5 space-y-3">
+                                    <h4 class="text-sm font-black text-gray-700 uppercase tracking-wider">Vista Previa</h4>
+                                    <div class="bg-gradient-to-br from-[#0a0a0a] to-[#0d1b2a] rounded-2xl p-5 text-white">
+                                        <p id="previewTitulo" class="text-base font-black leading-tight">Altos Artículos</p>
+                                        <p id="previewLema" class="text-xs text-white/50 mt-1">Tu mayorista de confianza</p>
+                                        <div class="h-px bg-white/10 my-3"></div>
+                                        <p id="previewDesc" class="text-xs text-white/70 leading-relaxed">Escribe tu descripción arriba para verla aquí...</p>
+                                        <div class="h-px bg-white/10 my-3"></div>
+                                        <div id="previewValores" class="flex flex-wrap gap-2"></div>
+                                    </div>
+                                    <p class="text-[10px] text-gray-400 text-center">La vista en tienda puede variar levemente en diseño</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1903,6 +2977,9 @@
                                 <div class="wix-preview-iframe-wrap device-desktop" id="wixPreviewWrap">
                                     <iframe id="wixPreviewFrame" src="https://articulos-redituables-altos.web.app/" frameborder="0"></iframe>
                                 </div>
+
+
+
                             </div>
                         </div>
                     </div>
@@ -2000,18 +3077,40 @@
                         <p class="text-xs font-black text-gray-600 uppercase tracking-wider flex items-center gap-2">
                             <i class="fas fa-mouse-pointer text-orange-400"></i> Botón CTA (opcional)
                         </p>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="slideCtaOptions">
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Texto del botón</label>
                                 <input type="text" id="slideCtaText" placeholder="Ej: Comprar Ahora"
                                     class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-300">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">URL destino</label>
-                                <input type="text" id="slideCtaUrl" placeholder="#catalogo"
-                                    class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-300">
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Acción / Destino</label>
+                                <select id="slideCtaType" onchange="window.toggleSlideCtaUrl?.()" class="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-orange-300">
+                                    <option value="#catalogo">Sección: Catálogo</option>
+                                    <option value="#descargar-pdf">Acción: Descargar PDF de Catálogo</option>
+                                    <option value="#perfil">Ventana: Mi Perfil / Login</option>
+                                    <option value="#facturacion">Ventana: Facturación</option>
+                                    <option value="#pedidos">Ventana: Mis Pedidos</option>
+                                    <option value="url">Enlace Externo / Archivo</option>
+                                </select>
+                            </div>
+                            <div id="slideCtaUrlContainer" class="col-span-full hidden mt-1">
+                                <label class="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1"><i class="fas fa-link"></i> Ingresa el Enlace URL / PDF</label>
+                                <input type="text" id="slideCtaUrl" placeholder="https://..."
+                                    class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm">
                             </div>
                         </div>
+                        <script>
+                            window.toggleSlideCtaUrl = function() {
+                                const type = document.getElementById('slideCtaType').value;
+                                const urlContainer = document.getElementById('slideCtaUrlContainer');
+                                if (type === 'url') {
+                                    urlContainer.classList.remove('hidden');
+                                } else {
+                                    urlContainer.classList.add('hidden');
+                                }
+                            };
+                        </script>
                     </div>
 
                     <!-- Orden -->
@@ -2140,6 +3239,23 @@
                                 tiene varios colores o diseños, añádelos aquí.</p>
                             <div id="variantsContainer" class="space-y-3">
                                 <!-- Las variantes se agregan por JS, cada una con un nombre y una foto -->
+                            </div>
+                        </div>
+
+                        <!-- FORMATOS / OPCIONES AVANZADAS -->
+                        <div class="bg-gray-50/50 rounded-2xl p-5 border border-dashed border-gray-300">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-black text-[#0d1b2a] uppercase text-sm tracking-wider flex items-center gap-2">
+                                    <i class="fas fa-list text-blue-500"></i> Formatos / Opciones (Ej. Raya, Cuadro)
+                                </h4>
+                                <button type="button" onclick="addOpcionExtraField()"
+                                    class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition">
+                                    <i class="fas fa-plus"></i> Añadir opción
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Si la libreta tiene varios formatos (rayas, puntos), añádelos aquí. También puedes poner foto si la tienes.</p>
+                            <div id="opcionesExtraContainer" class="space-y-3">
+                                <!-- Los formatos se agregan por JS, cada uno con nombre y foto -->
                             </div>
                         </div>
 
@@ -2295,6 +3411,18 @@
                                     <input type="number" id="minCaja" min="1" value="24"
                                         class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-gray-400">
                                 </div>
+                                <div class="col-span-2 mt-2">
+                                    <label class="flex items-center gap-3 cursor-pointer bg-blue-50/50 p-3 rounded-xl border border-blue-100/50 hover:bg-blue-50 transition">
+                                        <div class="relative">
+                                            <input type="checkbox" id="cajaSurtida" class="sr-only peer">
+                                            <div class="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm font-black text-blue-900 block pb-0">Venta de Caja en SURTIDO obligatorio</span>
+                                            <span class="text-[10px] font-bold text-gray-500 leading-tight">Obliga a los clientes a llevar colores y diseños mixtos (surtido genérico) al comprar cajas.</span>
+                                        </div>
+                                    </label>
+                                </div>
 
                                 <!-- Especial -->
                                 <div>
@@ -2379,6 +3507,210 @@
         </div>
 
         <script type="module" src="app.js?v=5"></script>
+
+        <!-- ✦ MICRO-INTERACCIONES ────────────────────────── -->
+        <script>
+        // ── Reloj en vivo en el topbar ──────────────────────
+        (function liveClock() {
+            const el = document.getElementById('adminClock');
+            if (!el) return;
+            const tick = () => {
+                const now = new Date();
+                const h = String(now.getHours()).padStart(2,'0');
+                const m = String(now.getMinutes()).padStart(2,'0');
+                const s = String(now.getSeconds()).padStart(2,'0');
+                el.textContent = `${h}:${m}:${s}`;
+            };
+            tick();
+            setInterval(tick, 1000);
+        })();
+
+        // ── Ripple en todos los botones btn-primary / btn-black ──
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-primary, .btn-black, .sidebar-item');
+            if (!btn) return;
+            const r = document.createElement('span');
+            r.className = 'ripple-effect';
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+            btn.appendChild(r);
+            r.addEventListener('animationend', () => r.remove());
+        });
+
+        // ── Hover parallax sutil en stat cards ──────────────
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top)  / rect.height - 0.5;
+                card.style.transform = `translateY(-3px) rotateX(${-y*4}deg) rotateY(${x*4}deg) scale(1.008)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+                card.style.transition = 'transform 0.4s ease, box-shadow 0.3s, border-color 0.3s';
+            });
+            card.addEventListener('mouseenter', () => {
+                card.style.transition = 'none';
+            });
+        });
+
+        // ── Counter-up animado para números del dashboard ───
+        function animateCount(el, target) {
+            const dur = 900;
+            const start = performance.now();
+            const from = parseInt(el.textContent) || 0;
+            const step = ts => {
+                const p = Math.min((ts - start) / dur, 1);
+                const ease = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(from + (target - from) * ease);
+                if (p < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }
+
+        // Observar los elementos de número cuando cambien
+        const numIds = ['dashTotal','dashOrders','dashClients','dashCats'];
+        const prevVals = {};
+        const mo = new MutationObserver(muts => {
+            muts.forEach(m => {
+                const el = m.target;
+                const val = parseInt(el.textContent);
+                if (!isNaN(val) && val !== prevVals[el.id]) {
+                    prevVals[el.id] = val;
+                    animateCount(el, val);
+                }
+            });
+        });
+        numIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) mo.observe(el, { childList: true, characterData: true, subtree: true });
+        });
+
+        // ── Fade-stagger al cambiar de tab (refuerzo) ───────
+        const origSwitch = window.switchTab;
+        if (origSwitch) {
+            window.switchTab = function(tab) {
+                origSwitch(tab);
+                // Cerrar sidebar en móvil al cambiar de tab
+                if (window.innerWidth < 768) {
+                    const sb = document.getElementById('sidebar');
+                    const ov = document.getElementById('sidebarOverlay');
+                    if (sb && !sb.classList.contains('-translate-x-full')) {
+                        toggleSidebar();
+                    }
+                }
+                // Re-animar children del tab activo
+                const active = document.querySelector('.tab-content.active');
+                if (active) {
+                    [...active.children].forEach((ch, i) => {
+                        ch.style.animation = 'none';
+                        ch.offsetHeight; // reflow
+                        ch.style.animation = `contentRow 0.4s ${i*0.06}s cubic-bezier(0.4,0,0.2,1) both`;
+                    });
+                }
+            };
+        }
+
+        // ── Sidebar Toggle Function ────────────────────────
+        window.toggleSidebar = function() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            if (!sb || !ov) return;
+            
+            const isHidden = sb.classList.contains('-translate-x-full');
+            if (isHidden) {
+                sb.classList.remove('-translate-x-full');
+                ov.classList.remove('hidden');
+                setTimeout(() => ov.classList.remove('opacity-0'), 10);
+            } else {
+                sb.classList.add('-translate-x-full');
+                ov.classList.add('opacity-0');
+                setTimeout(() => ov.classList.add('hidden'), 300);
+            }
+        };
+
+        // ── Glassmorphism shimmer al pasar mouse sobre header ─
+        const topbar = document.getElementById('topbar');
+        if (topbar) {
+            topbar.addEventListener('mousemove', e => {
+                const r = topbar.getBoundingClientRect();
+                const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+                topbar.style.backgroundImage = `radial-gradient(circle at ${x}% 50%, rgba(0,180,216,0.06), transparent 60%)`;
+            });
+            topbar.addEventListener('mouseleave', () => {
+                topbar.style.backgroundImage = '';
+            });
+        }
+        </script>
+
+        <!-- ══ MODAL: UBICACIÓN ══ -->
+        <div id="ubicacionModal" class="modal-overlay fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-6" style="opacity:0;pointer-events:none;">
+            <div class="modal-box bg-white w-full max-w-md rounded-2xl shadow-2xl max-h-[90dvh] flex flex-col" style="transform:scale(0.96)">
+                <div class="px-5 py-3.5 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-gradient-to-br from-[#00b4d8] to-[#0077b6] rounded-xl flex items-center justify-center text-white text-xs">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3 id="ubicacionModalTitle" class="text-sm font-black text-gray-900 uppercase tracking-wide">Nueva Ubicación</h3>
+                    </div>
+                    <button onclick="closeModal('ubicacionModal')" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
+                <div class="px-5 py-4 space-y-3.5 overflow-y-auto flex-1">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Nombre de la Sucursal *</label>
+                        <input type="text" id="ubicNombre" placeholder="Ej. Tienda Principal CDMX"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Dirección Completa *</label>
+                        <input type="text" id="ubicDireccion" placeholder="Ej. Calle 123, Col. Centro, CDMX"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] focus:bg-white transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Teléfono</label>
+                            <input type="text" id="ubicTelefono" placeholder="+52 55 1234 5678"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] focus:bg-white transition">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Horario</label>
+                            <input type="text" id="ubicHorario" placeholder="Lun-Sáb 9am-7pm"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] focus:bg-white transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Google Maps Embed URL</label>
+                        <details class="mb-2">
+                            <summary class="text-[10px] font-bold text-amber-700 cursor-pointer hover:text-amber-800 flex items-center gap-1 transition">
+                                <i class="fas fa-info-circle text-[9px]"></i> ¿Cómo obtener la URL correcta?
+                            </summary>
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-2.5 mt-1.5 text-[10px] text-amber-800 space-y-1">
+                                <ol class="list-decimal ml-4 space-y-0.5 font-semibold">
+                                    <li>Ve a <strong>Google Maps</strong> y busca tu lugar</li>
+                                    <li>Clic en <strong>"Compartir"</strong> → pestaña <strong>"Insertar un mapa"</strong></li>
+                                    <li>Copia <strong>solo la URL</strong> del atributo <code class="bg-amber-100 px-1 rounded">src="..."</code></li>
+                                </ol>
+                                <p class="text-amber-600 pt-0.5">✅ Empieza con: <code class="bg-amber-100 px-1 rounded text-[9px]">https://www.google.com/maps/embed?pb=</code></p>
+                            </div>
+                        </details>
+                        <textarea id="ubicMapUrl" rows="2" placeholder="https://www.google.com/maps/embed?pb=..."
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-[12px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] focus:bg-white resize-none transition font-mono"></textarea>
+                        <p id="ubicMapUrlHelp" class="hidden mt-1.5 text-[10px] text-red-600 bg-red-50 p-2 rounded-lg font-semibold leading-tight">
+                            🔴 Pegaste un enlace corto (goo.gl). Ese enlace <strong>no funciona en iframe</strong>. Sigue los pasos de arriba para obtener la URL de embed.
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 py-3.5 border-t border-gray-100 flex justify-end gap-2.5 bg-gray-50/80 rounded-b-2xl flex-shrink-0">
+                    <button onclick="closeModal('ubicacionModal')" class="px-4 py-2 rounded-xl text-gray-500 font-bold text-xs hover:bg-gray-200 transition uppercase tracking-wider">Cancelar</button>
+                    <button onclick="saveUbicacion()" class="px-5 py-2 bg-gradient-to-r from-[#0d1b2a] to-[#1b2e45] hover:from-[#1b2e45] hover:to-[#0d1b2a] text-white rounded-xl font-black text-xs transition flex items-center gap-1.5 shadow-lg uppercase tracking-wider">
+                        <i class="fas fa-save text-[10px]"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
     </body>
 
     </html>
