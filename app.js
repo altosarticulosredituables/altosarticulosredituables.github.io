@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Expose to window for inline scripts
+window.db = db;
+window._fs = { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, getDoc, setDoc };
+
 // ─── Cloudinary — Cloud Name pre-configurado ────────────────────────────────
 const DEFAULT_CLOUD_NAME = 'dpkeniork';
 
@@ -196,7 +200,7 @@ window.loadFacturas = async () => {
                     <p>CP: ${f.cp} | Reg: ${f.regimenFiscal} - ${REGIMENES_MAP[f.regimenFiscal] || 'Desconocido'} | Uso: ${f.usoCfdi} - ${USO_CFDI_MAP[f.usoCfdi] || 'Desconocido'}</p>
                 </td>
                 <td class="px-6 py-4">
-                    <a href="${f.ticketUrl || '#'}" target="_blank" class="w-8 h-8 flex flex-col items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition group relative ${!f.ticketUrl ? 'opacity-50 pointer-events-none' : ''}" title="Ver Ticket">
+                    <a href="${f.ticketUrl || '#'}" target="_blank" onclick="return confirm('¿Deseas abrir la imagen/archivo del ticket subida por este cliente?');" class="w-8 h-8 flex flex-col items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition group relative ${!f.ticketUrl ? 'opacity-50 pointer-events-none' : ''}" title="Ver Ticket">
                         <i class="fas fa-image"></i>
                     </a>
                 </td>
@@ -362,10 +366,18 @@ window.openCloudinaryWidget = (type, extraId = null) => {
                 prev.src = optimizedUrl;
                 prev.classList.remove('hidden');
                 document.getElementById(`variantIcon-${extraId}`).classList.add('hidden');
+            } else if (type === 'opcionExtra' && extraId !== null) {
+                document.getElementById(`opcionExtraUrl-${extraId}`).value = optimizedUrl;
+                const prev = document.getElementById(`opcionExtraPreview-${extraId}`);
+                prev.src = optimizedUrl;
+                prev.classList.remove('hidden');
+                document.getElementById(`opcionExtraIcon-${extraId}`).classList.add('hidden');
             } else if (type === 'bodysection') {
                 if (window.addBodySectionImage) window.addBodySectionImage(optimizedUrl);
             } else if (type === 'prefooter') {
                 if (window.addPreFooterImage) window.addPreFooterImage(optimizedUrl);
+            } else if (type === 'nosotros') {
+                if (window.handleNosotrosImageSuccess) window.handleNosotrosImageSuccess(optimizedUrl);
             }
         } else if (error && error !== 'Widget is completely closed.') {
             console.error('Widget upload error', error);
@@ -424,12 +436,16 @@ function openModal(id) {
     el.style.pointerEvents = 'auto';
     el.querySelector('.modal-box').style.transform = 'scale(1)';
 }
+
 function closeModal(id) {
     const el = document.getElementById(id);
     el.style.opacity = '0';
     el.style.pointerEvents = 'none';
     el.querySelector('.modal-box').style.transform = 'scale(0.96)';
 }
+
+window.openModal = openModal;
+window.closeModal = closeModal;
 
 // ════════════════════════════════════════════════════════════════════════════
 //  PRODUCTOS
@@ -481,6 +497,29 @@ window.addVariantField = (name = '', url = '', sku = '', description = '') => {
     document.getElementById('variantsContainer').appendChild(div);
 };
 
+let opcionExtraCount = 0;
+window.addOpcionExtraField = (name = '', url = '') => {
+    opcionExtraCount++;
+    const oId = opcionExtraCount;
+    const div = document.createElement('div');
+    div.id = `opcionExtraBox-${oId}`;
+    div.className = 'flex flex-col md:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm opcionExtra-item';
+    div.innerHTML = `
+        <div class="w-16 h-16 bg-gray-50 border border-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer overflow-hidden relative" onclick="openCloudinaryWidget('opcionExtra', ${oId})">
+            <img id="opcionExtraPreview-${oId}" src="${url}" class="w-full h-full object-cover ${url ? '' : 'hidden'}">
+            <i id="opcionExtraIcon-${oId}" class="fas fa-camera text-gray-300 ${url ? 'hidden' : ''}"></i>
+            <input type="hidden" id="opcionExtraUrl-${oId}" class="opcionExtra-img-val" value="${url}">
+        </div>
+        <div class="flex-1 w-full flex items-center gap-2">
+            <input type="text" id="opcionExtraName-${oId}" value="${name}" placeholder="Formato / Diseño (Ej. Raya, Libreta azul)" class="opcionExtra-name-val w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-blue-400">
+        </div>
+        <button type="button" onclick="document.getElementById('opcionExtraBox-${oId}').remove()" class="w-10 h-10 flex items-center justify-center bg-red-50 text-red-400 hover:bg-red-100 rounded-lg transition flex-shrink-0 mt-2 md:mt-0">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    document.getElementById('opcionesExtraContainer').appendChild(div);
+};
+
 window.openProductModal = (id = null, data = null) => {
     editProductId = id;
     document.getElementById('productModalTitle').textContent = id ? 'Editar Artículo' : 'Nuevo Artículo';
@@ -492,6 +531,7 @@ window.openProductModal = (id = null, data = null) => {
 
     document.getElementById('variantsContainer').innerHTML = '';
     document.getElementById('extraImagesContainer').innerHTML = '';
+    document.getElementById('opcionesExtraContainer').innerHTML = '';
 
     // Se cargan dinámicamente desde los productos existentes en loadProducts()
     if (id && data) {
@@ -506,6 +546,7 @@ window.openProductModal = (id = null, data = null) => {
         document.getElementById('minMayoreo').value = data.minMayoreo || 5;
         document.getElementById('priceCaja').value = data.precioCaja || '';
         document.getElementById('minCaja').value = data.minCaja || 24;
+        document.getElementById('cajaSurtida').checked = data.cajaSurtida === true;
         document.getElementById('priceEspecial').value = data.precioEspecial || '';
         document.getElementById('minEspecial').value = data.minEspecial || 50;
         document.getElementById('productImageUrl').value = data.imageUrl || '';
@@ -525,6 +566,13 @@ window.openProductModal = (id = null, data = null) => {
         if (data.extraImages && data.extraImages.length > 0) {
             data.extraImages.forEach(url => {
                 addExtraImageField(url);
+            });
+        }
+        if (data.opcionesExtra && data.opcionesExtra.length > 0) {
+            data.opcionesExtra.forEach(opt => {
+                const nameStr = typeof opt === 'string' ? opt : opt.name;
+                const imgStr = typeof opt === 'string' ? '' : opt.imageUrl;
+                addOpcionExtraField(nameStr, imgStr);
             });
         }
         // Restore sections
@@ -589,6 +637,15 @@ window.saveProduct = async () => {
             if (cb.checked) sections.push(cb.value);
         });
 
+        const opcionesExtra = [];
+        document.querySelectorAll('.opcionExtra-item').forEach(el => {
+            const oName = el.querySelector('.opcionExtra-name-val').value.trim();
+            const oUrl = el.querySelector('.opcionExtra-img-val').value.trim();
+            if (oName || oUrl) {
+                opcionesExtra.push({ name: oName, imageUrl: oUrl });
+            }
+        });
+
         const productData = {
             name: document.getElementById('productName').value.trim(),
             sku: document.getElementById('productSKU').value.trim().toUpperCase(),
@@ -598,6 +655,7 @@ window.saveProduct = async () => {
             extraImages: extraImages,
             variants: variants,
             sections: sections,
+            opcionesExtra: opcionesExtra,
             stock: parseInt(document.getElementById('productStock').value) || 0,
             status: document.getElementById('productStatus').value || 'Activo',
             precioIndividual: parseFloat(document.getElementById('priceIndividual').value) || 0,
@@ -605,6 +663,7 @@ window.saveProduct = async () => {
             minMayoreo: parseInt(document.getElementById('minMayoreo').value) || 5,
             precioCaja: parseFloat(document.getElementById('priceCaja').value) || 0,
             minCaja: parseInt(document.getElementById('minCaja').value) || 24,
+            cajaSurtida: document.getElementById('cajaSurtida').checked,
             precioEspecial: parseFloat(document.getElementById('priceEspecial').value) || 0,
             minEspecial: parseInt(document.getElementById('minEspecial').value) || 50,
             updatedAt: new Date().toISOString()
@@ -865,13 +924,17 @@ document.getElementById('searchInput').addEventListener('input', e => {
 // ════════════════════════════════════════════════════════════════════════════
 //  CARRUSEL HERO
 // ════════════════════════════════════════════════════════════════════════════
-window.openSlideModal = () => {
+    window.openSlideModal = () => {
     document.getElementById('slideId').value = '';
     document.getElementById('slideModalTitle').textContent = 'Nuevo Slide Hero';
     ['slideTitle', 'slideSubtitle', 'slideCtaText', 'slideCtaUrl'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
+    
+    const typeEl = document.getElementById('slideCtaType');
+    if (typeEl) typeEl.value = '#catalogo';
+    if (window.toggleSlideCtaUrl) window.toggleSlideCtaUrl();
     document.getElementById('slideOrder').value = '1';
     
     // Reset Desktop Image
@@ -908,13 +971,21 @@ window.saveSlide = async () => {
 
         if (!imageUrl) { showToast('Sube una imagen de PC primero', 'error'); return; }
 
+        let finalCtaUrl = '';
+        const ctaType = document.getElementById('slideCtaType') ? document.getElementById('slideCtaType').value : '#catalogo';
+        if (ctaType !== 'url') {
+            finalCtaUrl = ctaType;
+        } else {
+            finalCtaUrl = document.getElementById('slideCtaUrl').value.trim();
+        }
+
         const slideData = {
             imageUrl,
             mobileImageUrl,
             title: document.getElementById('slideTitle').value.trim(),
             subtitle: document.getElementById('slideSubtitle').value.trim(),
             ctaText: document.getElementById('slideCtaText').value.trim(),
-            ctaUrl: document.getElementById('slideCtaUrl').value.trim(),
+            ctaUrl: finalCtaUrl,
             order: parseInt(document.getElementById('slideOrder').value) || 1,
             updatedAt: new Date().toISOString()
         };
@@ -950,7 +1021,17 @@ window.editSlide = async (id) => {
         document.getElementById('slideTitle').value = s.title || '';
         document.getElementById('slideSubtitle').value = s.subtitle || '';
         document.getElementById('slideCtaText').value = s.ctaText || '';
-        document.getElementById('slideCtaUrl').value = s.ctaUrl || '';
+        
+        const typeEl = document.getElementById('slideCtaType');
+        const urlEl = document.getElementById('slideCtaUrl');
+        if (['#catalogo', '#descargar-pdf', '#facturacion', '#perfil', '#pedidos'].includes(s.ctaUrl)) {
+            if (typeEl) typeEl.value = s.ctaUrl;
+            if (urlEl) urlEl.value = '';
+        } else {
+            if (typeEl) typeEl.value = 'url';
+            if (urlEl) urlEl.value = s.ctaUrl || '';
+        }
+        if (window.toggleSlideCtaUrl) window.toggleSlideCtaUrl();
         document.getElementById('slideOrder').value = s.order || 1;
         
         // Desktop Image
@@ -1214,27 +1295,56 @@ function renderClients(clients) {
         return;
     }
     tbody.innerHTML = clients.map(c => {
-        const providerIcon = c.provider === 'google.com'
-            ? '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-500"><i class="fab fa-google text-[10px]"></i> Google</span>'
-            : '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500"><i class="fas fa-envelope text-[10px]"></i> Email</span>';
+        let providerDisplay = 'Email';
+        let providerIconTag = '<i class="fas fa-envelope text-[10px]"></i>';
+        let providerColor = 'text-gray-500';
+
+        if (c.provider === 'google.com') {
+            providerDisplay = 'Google';
+            providerIconTag = '<i class="fab fa-google text-[10px]"></i>';
+            providerColor = 'text-blue-500';
+        } else if (c.provider === 'phone') {
+            providerDisplay = 'Teléfono';
+            providerIconTag = '<i class="fas fa-phone text-[10px]"></i>';
+            providerColor = 'text-green-500';
+        }
+
+        const providerIcon = `<span class="inline-flex items-center gap-1 text-[11px] font-semibold ${providerColor}">${providerIconTag} ${providerDisplay}</span>`;
+        
         const lastLogin = c.lastLogin?.toDate
             ? c.lastLogin.toDate().toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
             : '—';
         const avatar = c.photoURL
             ? `<img src="${c.photoURL}" class="w-8 h-8 rounded-full object-cover border border-gray-200" alt="">`
-            : `<div class="w-8 h-8 rounded-full bg-[#0d1b2a] text-white flex items-center justify-center text-[11px] font-black uppercase">${(c.displayName || c.email || '?')[0]}</div>`;
+            : `<div class="w-8 h-8 rounded-full bg-[#0d1b2a] text-white flex items-center justify-center text-[11px] font-black uppercase">${(c.displayName || c.email || c.phone || '?')[0]}</div>`;
         
         const isEspecial = c.precioEspecial === true;
+
+        let contactInfo = c.email || '—';
+        if (c.provider === 'phone' || c.phone) {
+            let formattedPhone = c.phone || '';
+            let country = '';
+            if (formattedPhone.startsWith('+52')) {
+                formattedPhone = formattedPhone.replace('+52', '');
+                country = '🇲🇽 México (+52)';
+            }
+            contactInfo = `
+                <div class="flex flex-col">
+                    <span class="font-bold text-gray-800 tracking-wide">${formattedPhone}</span>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">${country}</span>
+                </div>
+            `;
+        }
 
         return `
             <tr class="border-t border-gray-50 hover:bg-gray-50/50 transition">
                 <td class="px-6 py-3">
                     <div class="flex items-center gap-3">
                         ${avatar}
-                        <span class="text-sm font-bold text-gray-800">${c.displayName || '<span class="text-gray-300 italic">Sin nombre</span>'}</span>
+                        <span class="text-sm font-bold text-gray-800">${c.displayName || '<span class="text-gray-300 italic">Sin nombre completo</span>'}</span>
                     </div>
                 </td>
-                <td class="px-6 py-3 text-sm text-gray-500 font-medium">${c.email || '—'}</td>
+                <td class="px-6 py-3 text-sm text-gray-500 font-medium">${contactInfo}</td>
                 <td class="px-6 py-3">${providerIcon}</td>
                 <td class="px-6 py-3 text-xs text-gray-400 font-medium">${lastLogin}</td>
                 <td class="px-6 py-3">
@@ -2207,4 +2317,304 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => wixSendToFrame(), 300);
         });
     }
+});
+
+// ═════════════════════════════════════════════════════════════
+// ══ UBICACIONES ══════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════
+let _editUbicacionId = null;
+
+window.openUbicacionModal = (id = null, data = null) => {
+    _editUbicacionId = id;
+    document.getElementById('ubicacionModalTitle').textContent = id ? 'Editar Ubicación' : 'Nueva Ubicación';
+    document.getElementById('ubicNombre').value = data?.nombre || '';
+    document.getElementById('ubicDireccion').value = data?.direccion || '';
+    document.getElementById('ubicTelefono').value = data?.telefono || '';
+    document.getElementById('ubicHorario').value = data?.horario || '';
+    document.getElementById('ubicMapUrl').value = data?.mapUrl || '';
+    openModal('ubicacionModal');
+};
+
+// ── Convierte cualquier URL de Google Maps al formato embed ──
+function convertToEmbedUrl(raw) {
+    if (!raw) return '';
+    raw = raw.trim();
+    // Already an embed URL
+    if (raw.includes('maps/embed')) return raw;
+    // Short URLs like maps.app.goo.gl — can't auto-convert, warn user
+    if (raw.includes('goo.gl') || raw.includes('maps.app.goo.gl')) {
+        return 'NEEDS_PLACE_ID'; // signal to show help
+    }
+    // Extract coordinates from /place/ or @lat,lng links
+    const coordMatch = raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (coordMatch) {
+        const lat = coordMatch[1], lng = coordMatch[2];
+        return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d2000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2smx!4v1`;
+    }
+    // Embed via place name/address query as fallback
+    const qMatch = raw.match(/[?&]q=([^&]+)/);
+    if (qMatch) {
+        return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBZdMTsbZ9lMPhHAUrqNW3d86WEc8gLdrI&q=${qMatch[1]}`;
+    }
+    // Extract search query from /place/ path
+    const placeMatch = raw.match(/\/place\/([^/@?]+)/);
+    if (placeMatch) {
+        return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBZdMTsbZ9lMPhHAUrqNW3d86WEc8gLdrI&q=${placeMatch[1]}`;
+    }
+    return raw; // return as-is if unknown
+}
+
+window.saveUbicacion = async () => {
+    const rawUrl = document.getElementById('ubicMapUrl').value.trim();
+    let mapUrl = convertToEmbedUrl(rawUrl);
+    if (mapUrl === 'NEEDS_PLACE_ID') {
+        showToast('URL corta detectada. Ve a Google Maps → Compartir → "Insertar mapa" y copia el src del iframe', 'error');
+        // Show inline help
+        const helpEl = document.getElementById('ubicMapUrlHelp');
+        if (helpEl) helpEl.classList.remove('hidden');
+        return;
+    }
+    const data = {
+        nombre: document.getElementById('ubicNombre').value.trim(),
+        direccion: document.getElementById('ubicDireccion').value.trim(),
+        telefono: document.getElementById('ubicTelefono').value.trim(),
+        horario: document.getElementById('ubicHorario').value.trim(),
+        mapUrl,
+        updatedAt: new Date().toISOString()
+    };
+    if (!data.nombre || !data.direccion) { showToast('Completa nombre y dirección', 'error'); return; }
+    try {
+        if (_editUbicacionId) {
+            await updateDoc(doc(db, 'ubicaciones', _editUbicacionId), data);
+        } else {
+            await addDoc(collection(db, 'ubicaciones'), { ...data, createdAt: new Date().toISOString() });
+        }
+        showToast('Ubicación guardada ✓', 'success');
+        closeModal('ubicacionModal');
+        window.loadUbicaciones();
+    } catch(e) { console.error(e); showToast('Error guardando ubicación: ' + e.message, 'error'); }
+};
+
+
+window.deleteUbicacion = async (id) => {
+    if (!confirm('¿Eliminar esta ubicación?')) return;
+    try {
+        await deleteDoc(doc(db, 'ubicaciones', id));
+        showToast('Ubicación eliminada', 'success');
+        window.loadUbicaciones();
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.autoFixMapUrl = async (id, encodedUrl) => {
+    const fixedUrl = decodeURIComponent(encodedUrl);
+    if (!fixedUrl || !id) return;
+    try {
+        await updateDoc(doc(db, 'ubicaciones', id), { mapUrl: fixedUrl, updatedAt: new Date().toISOString() });
+        showToast('✓ URL corregida y guardada', 'success');
+        window.loadUbicaciones();
+    } catch(e) { showToast('Error al corregir: ' + e.message, 'error'); }
+};
+
+window.loadUbicaciones = async () => {
+    const container = document.getElementById('ubicacionesList');
+    if (!container) return;
+    container.innerHTML = '<div class="col-span-full text-center py-12"><i class="fas fa-spinner fa-spin text-2xl text-[#00b4d8]"></i></div>';
+    try {
+        const snap = await getDocs(collection(db, 'ubicaciones'));
+        if (snap.empty) {
+            container.innerHTML = '<div class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-map-marker-alt text-4xl mb-3 block opacity-40"></i><p class="font-bold text-sm">No hay ubicaciones registradas</p><p class="text-xs mt-1">Agrega tu primera sucursal con el botón de arriba</p></div>';
+            return;
+        }
+        container.innerHTML = '';
+        snap.forEach(d => {
+            const loc = { id: d.id, ...d.data() };
+            const card = document.createElement('div');
+            card.className = 'panel p-0 overflow-hidden';
+            const isEmbedUrl = loc.mapUrl && loc.mapUrl.includes('maps/embed');
+            const tryFixUrl = loc.mapUrl ? convertToEmbedUrl(loc.mapUrl) : '';
+            const canAutoFix = tryFixUrl && tryFixUrl !== 'NEEDS_PLACE_ID' && tryFixUrl !== loc.mapUrl && tryFixUrl.includes('maps/embed');
+            
+            let mapSection = '';
+            if (!loc.mapUrl) {
+                mapSection = '<div class="h-[140px] bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center text-gray-300 gap-1"><i class="fas fa-map text-2xl"></i><span class="text-[9px] font-bold uppercase tracking-wider">Sin mapa</span></div>';
+            } else if (isEmbedUrl) {
+                mapSection = `<div class="h-[140px] overflow-hidden"><iframe src="${loc.mapUrl}" width="100%" height="100%" style="border:0;display:block;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`;
+            } else {
+                mapSection = `<div class="h-[100px] bg-amber-50 flex flex-col items-center justify-center gap-1.5 px-4 text-center">
+                    <i class="fas fa-exclamation-triangle text-amber-400 text-lg"></i>
+                    <p class="text-[10px] font-bold text-amber-700 leading-tight">URL inválida — Edita y pega la URL de "Insertar mapa"</p>
+                    ${canAutoFix ? `<button onclick="autoFixMapUrl('${loc.id}','${encodeURIComponent(tryFixUrl)}')" class="text-[9px] font-black bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg transition"><i class="fas fa-magic mr-1"></i>Auto-corregir</button>` : ''}
+                   </div>`;
+            }
+            
+            card.innerHTML = `
+                ${mapSection}
+                <div class="p-4 space-y-2">
+                    <p class="font-black text-gray-900 text-[14px] leading-tight">${loc.nombre}</p>
+                    <div class="space-y-1.5">
+                        <p class="text-[11px] text-gray-500 font-medium flex items-start gap-1.5 leading-snug">
+                            <i class="fas fa-map-marker-alt text-[#00b4d8] mt-0.5 text-[10px] flex-shrink-0"></i>
+                            <span>${loc.direccion}</span>
+                        </p>
+                        ${loc.horario ? `<p class="text-[11px] text-gray-500 font-medium flex items-center gap-1.5"><i class="fas fa-clock text-[#00b4d8] text-[10px]"></i>${loc.horario}</p>` : ''}
+                        ${loc.telefono ? `<p class="text-[11px] text-gray-500 font-medium flex items-center gap-1.5"><i class="fas fa-phone text-[#00b4d8] text-[10px]"></i>${loc.telefono}</p>` : ''}
+                    </div>
+                    <div class="flex gap-2 pt-2 border-t border-gray-100">
+                        <button onclick="openUbicacionModal('${loc.id}', JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(loc))}')))" class="flex-1 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-[11px] font-black text-gray-600 transition flex items-center justify-center gap-1.5">
+                            <i class="fas fa-pen text-[9px]"></i> Editar
+                        </button>
+                        <button onclick="deleteUbicacion('${loc.id}')" class="py-2 px-3 bg-red-50 hover:bg-red-100 rounded-xl text-[11px] font-black text-red-500 transition">
+                            <i class="fas fa-trash text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>`;
+            container.appendChild(card);
+        });
+    } catch(e) { console.error(e); container.innerHTML = `<div class="col-span-full text-center py-8 text-red-400">Error: ${e.message}</div>`; }
+};
+
+
+// ═════════════════════════════════════════════════════════════
+// ══ NOSOTROS ═════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════
+let currentNosotrosImageUrl = '';
+
+window.loadNosotros = async () => {
+    try {
+        const snap = await getDoc(doc(db, 'config', 'nosotros'));
+        if (!snap.exists()) return;
+        const d = snap.data();
+        
+        currentNosotrosImageUrl = d.imageUrl || '';
+        const prev = document.getElementById('nosotrosImgPreview');
+        const ph = document.getElementById('nosotrosImgPlaceholder');
+        const btnRm = document.getElementById('btnRemoveNosotrosImg');
+        if (currentNosotrosImageUrl) {
+            prev.src = currentNosotrosImageUrl;
+            prev.classList.remove('hidden');
+            ph.classList.add('hidden');
+            btnRm.classList.remove('hidden');
+        } else {
+            prev.src = '';
+            prev.classList.add('hidden');
+            ph.classList.remove('hidden');
+            btnRm.classList.add('hidden');
+        }
+        document.getElementById('nosotrosTitulo').value = d.titulo || '';
+        document.getElementById('nosotrosLema').value = d.lema || '';
+        document.getElementById('nosotrosDescripcion').value = d.descripcion || '';
+        document.getElementById('nosotrosMision').value = d.mision || '';
+        document.getElementById('nosotrosVision').value = d.vision || '';
+        document.getElementById('nosotrosTelefono').value = d.telefono || '';
+        document.getElementById('nosotrosEmail').value = d.email || '';
+        document.getElementById('nosotrosInstagram').value = d.instagram || '';
+        document.getElementById('nosotrosFacebook').value = d.facebook || '';
+        const container = document.getElementById('nosotrosValoresContainer');
+        if (container) { container.innerHTML = ''; }
+        (d.valores || []).forEach(v => window.addNosotrosValor(v.icono, v.texto));
+        window.updateNosotrosPreview();
+    } catch(e) { console.error(e); }
+};
+
+window.handleNosotrosImageSuccess = (url) => {
+    currentNosotrosImageUrl = url;
+    const prev = document.getElementById('nosotrosImgPreview');
+    prev.src = url;
+    prev.classList.remove('hidden');
+    document.getElementById('nosotrosImgPlaceholder').classList.add('hidden');
+    document.getElementById('btnRemoveNosotrosImg').classList.remove('hidden');
+    window.updateNosotrosPreview();
+};
+
+window.removeNosotrosImage = () => {
+    currentNosotrosImageUrl = '';
+    const prev = document.getElementById('nosotrosImgPreview');
+    prev.src = '';
+    prev.classList.add('hidden');
+    document.getElementById('nosotrosImgPlaceholder').classList.remove('hidden');
+    document.getElementById('btnRemoveNosotrosImg').classList.add('hidden');
+    window.updateNosotrosPreview();
+};
+
+window.saveNosotros = async () => {
+    const valores = [];
+    document.querySelectorAll('.nosotros-valor-item').forEach(row => {
+        const icono = row.querySelector('.valor-icono')?.value?.trim() || '';
+        const texto = row.querySelector('.valor-texto')?.value?.trim() || '';
+        if (texto) valores.push({ icono, texto });
+    });
+    const data = {
+        titulo: document.getElementById('nosotrosTitulo').value.trim(),
+        lema: document.getElementById('nosotrosLema').value.trim(),
+        descripcion: document.getElementById('nosotrosDescripcion').value.trim(),
+        mision: document.getElementById('nosotrosMision').value.trim(),
+        vision: document.getElementById('nosotrosVision').value.trim(),
+        telefono: document.getElementById('nosotrosTelefono').value.trim(),
+        email: document.getElementById('nosotrosEmail').value.trim(),
+        instagram: document.getElementById('nosotrosInstagram').value.trim(),
+        facebook: document.getElementById('nosotrosFacebook').value.trim(),
+        imageUrl: currentNosotrosImageUrl,
+        valores,
+        updatedAt: new Date().toISOString()
+    };
+    try {
+        await setDoc(doc(db, 'config', 'nosotros'), data);
+        showToast('Información guardada ✓', 'success');
+    } catch(e) { console.error(e); showToast('Error guardando: ' + e.message, 'error'); }
+};
+
+let _valorCounter = 0;
+window.addNosotrosValor = (icono = '⭐', texto = '') => {
+    _valorCounter++;
+    const id = _valorCounter;
+    const div = document.createElement('div');
+    div.className = 'nosotros-valor-item flex items-center gap-2';
+    div.id = `valorItem-${id}`;
+    div.innerHTML = `
+        <input type="text" value="${icono}" placeholder="⭐" class="valor-icono w-10 bg-white border border-gray-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
+        <input type="text" value="${texto}" placeholder="10+ años de experiencia" class="valor-texto flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]" oninput="updateNosotrosPreview()">
+        <button onclick="document.getElementById('valorItem-${id}').remove();updateNosotrosPreview();" class="w-8 h-8 bg-red-50 text-red-400 hover:bg-red-100 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>`;
+    document.getElementById('nosotrosValoresContainer')?.appendChild(div);
+};
+
+window.updateNosotrosPreview = () => {
+    const t = document.getElementById('nosotrosTitulo')?.value || 'Altos Artículos';
+    const l = document.getElementById('nosotrosLema')?.value || 'Tu mayorista de confianza';
+    const d = document.getElementById('nosotrosDescripcion')?.value || 'Escribe tu descripción aquí...';
+    const pt = document.getElementById('previewTitulo');
+    const pl = document.getElementById('previewLema');
+    const pd = document.getElementById('previewDesc');
+    const pv = document.getElementById('previewValores');
+    if (pt) pt.textContent = t;
+    if (pl) pl.textContent = l;
+    if (pd) pd.textContent = d.slice(0, 120) + (d.length > 120 ? '...' : '');
+    if (pv) {
+        pv.innerHTML = '';
+        document.querySelectorAll('.nosotros-valor-item').forEach(row => {
+            const icono = row.querySelector('.valor-icono')?.value || '⭐';
+            const texto = row.querySelector('.valor-texto')?.value || '';
+            if (texto) {
+                const badge = document.createElement('span');
+                badge.className = 'text-[10px] bg-white/10 text-white/80 rounded-full px-2 py-1';
+                badge.textContent = `${icono} ${texto}`;
+                pv.appendChild(badge);
+            }
+        });
+    }
+};
+
+// ── Patch switchTab to lazy-load data ─────────────────────────────────────
+const _origSwitchForUbi = window.switchTab;
+window.switchTab = function(tab) {
+    if (_origSwitchForUbi) _origSwitchForUbi(tab);
+    if (tab === 'ubicaciones') window.loadUbicaciones();
+    if (tab === 'nosotros') window.loadNosotros();
+};
+
+// ── Live preview wiring (run after DOM is ready) ─────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    ['nosotrosTitulo', 'nosotrosLema', 'nosotrosDescripcion'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', window.updateNosotrosPreview);
+    });
 });
