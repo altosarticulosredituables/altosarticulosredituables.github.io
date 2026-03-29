@@ -1270,7 +1270,7 @@ let allClients = [];
 
 window.loadClients = async function () {
     const tbody = document.getElementById('clientsTableBody');
-    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-300 text-sm font-semibold"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-300 text-sm font-semibold"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando...</td></tr>';
     try {
         const snap = await getDocs(collection(db, 'clientes'));
         allClients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1284,14 +1284,14 @@ window.loadClients = async function () {
         renderClients(allClients);
     } catch (err) {
         console.error('Error loading clients:', err);
-        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-red-400 text-sm font-semibold">Error cargando clientes</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-red-400 text-sm font-semibold">Error cargando clientes</td></tr>';
     }
 };
 
 function renderClients(clients) {
     const tbody = document.getElementById('clientsTableBody');
     if (clients.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-300 text-sm font-semibold"><i class="fas fa-user-slash mr-2"></i>No hay clientes registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-300 text-sm font-semibold"><i class="fas fa-user-slash mr-2"></i>No hay clientes registrados</td></tr>';
         return;
     }
     tbody.innerHTML = clients.map(c => {
@@ -2500,18 +2500,42 @@ window.loadNosotros = async () => {
             ph.classList.remove('hidden');
             btnRm.classList.add('hidden');
         }
-        document.getElementById('nosotrosTitulo').value = d.titulo || '';
+        document.getElementById('nosotrosTitulo1').value = d.titulo1 || 'Acerca de';
+        document.getElementById('nosotrosColor1').value = d.color1 || '#111827';
+        document.getElementById('nosotrosTitulo2').value = d.titulo2 || 'Nuestra Empresa';
+        document.getElementById('nosotrosColor2').value = d.color2 || '#1d4ed8';
+        document.getElementById('nosotrosFondoCuadricula').checked = d.fondoCuadricula !== undefined ? d.fondoCuadricula : false;
+        
         document.getElementById('nosotrosLema').value = d.lema || '';
         document.getElementById('nosotrosDescripcion').value = d.descripcion || '';
+        document.getElementById('nosotrosColorHistoria').value = d.colorHistoria || '#ffffff';
         document.getElementById('nosotrosMision').value = d.mision || '';
+        document.getElementById('nosotrosColorMision').value = d.colorMision || '#f97316';
         document.getElementById('nosotrosVision').value = d.vision || '';
+        document.getElementById('nosotrosColorVision').value = d.colorVision || '#06b6d4';
         document.getElementById('nosotrosTelefono').value = d.telefono || '';
         document.getElementById('nosotrosEmail').value = d.email || '';
         document.getElementById('nosotrosInstagram').value = d.instagram || '';
         document.getElementById('nosotrosFacebook').value = d.facebook || '';
+
+        // Valores corporativos
+        const fontSel = document.getElementById('nosotrosValoresTitleFont');
+        if (fontSel) fontSel.value = d.valoresTitleFont || 'font-sans';
+
         const container = document.getElementById('nosotrosValoresContainer');
         if (container) { container.innerHTML = ''; }
-        (d.valores || []).forEach(v => window.addNosotrosValor(v.icono, v.texto));
+        (d.valores || []).forEach(v => window.addNosotrosValor(v.icono || 'fas fa-star', v.texto || '', v.desc || '', v.color || '#3b82f6'));
+
+        // Líneas de productos
+        const lineasC = document.getElementById('nosotrosLineasContainer');
+        if (lineasC) { lineasC.innerHTML = ''; }
+        (d.lineas || []).forEach(l => window.addNosotrosLinea(l.icono || 'fas fa-box', l.titulo || '', l.desc || '', l.color || '#3b82f6'));
+
+        // Compromiso
+        document.getElementById('nosotrosCompromisoTitulo').value = d.compromisoTitulo || '';
+        document.getElementById('nosotrosCompromisoTexto').value = d.compromisoTexto || '';
+        document.getElementById('nosotrosCompromisoTags').value = (d.compromisoTags || []).join(', ');
+
         window.updateNosotrosPreview();
     } catch(e) { console.error(e); }
 };
@@ -2537,24 +2561,54 @@ window.removeNosotrosImage = () => {
 };
 
 window.saveNosotros = async () => {
+    // Valores corporativos
     const valores = [];
     document.querySelectorAll('.nosotros-valor-item').forEach(row => {
         const icono = row.querySelector('.valor-icono')?.value?.trim() || '';
         const texto = row.querySelector('.valor-texto')?.value?.trim() || '';
-        if (texto) valores.push({ icono, texto });
+        const desc = row.querySelector('.valor-desc')?.value?.trim() || '';
+        const color = row.querySelector('.valor-color')?.value?.trim() || '#3b82f6';
+        if (texto) valores.push({ icono, texto, desc, color });
     });
+
+    // Líneas de productos
+    const lineas = [];
+    document.querySelectorAll('.nosotros-linea-item').forEach(row => {
+        const icono = row.querySelector('.linea-icono')?.value?.trim() || '';
+        const titulo = row.querySelector('.linea-titulo')?.value?.trim() || '';
+        const desc = row.querySelector('.linea-desc')?.value?.trim() || '';
+        const color = row.querySelector('.linea-color')?.value?.trim() || '#3b82f6';
+        if (titulo) lineas.push({ icono, titulo, desc, color });
+    });
+
+    // Compromiso tags
+    const tagsRaw = document.getElementById('nosotrosCompromisoTags').value.trim();
+    const compromisoTags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
     const data = {
-        titulo: document.getElementById('nosotrosTitulo').value.trim(),
+        titulo1: document.getElementById('nosotrosTitulo1').value.trim(),
+        color1: document.getElementById('nosotrosColor1').value.trim(),
+        titulo2: document.getElementById('nosotrosTitulo2').value.trim(),
+        color2: document.getElementById('nosotrosColor2').value.trim(),
+        fondoCuadricula: document.getElementById('nosotrosFondoCuadricula').checked,
         lema: document.getElementById('nosotrosLema').value.trim(),
         descripcion: document.getElementById('nosotrosDescripcion').value.trim(),
+        colorHistoria: document.getElementById('nosotrosColorHistoria').value.trim() || '#ffffff',
         mision: document.getElementById('nosotrosMision').value.trim(),
+        colorMision: document.getElementById('nosotrosColorMision').value.trim() || '#f97316',
         vision: document.getElementById('nosotrosVision').value.trim(),
+        colorVision: document.getElementById('nosotrosColorVision').value.trim() || '#06b6d4',
         telefono: document.getElementById('nosotrosTelefono').value.trim(),
         email: document.getElementById('nosotrosEmail').value.trim(),
         instagram: document.getElementById('nosotrosInstagram').value.trim(),
         facebook: document.getElementById('nosotrosFacebook').value.trim(),
         imageUrl: currentNosotrosImageUrl,
         valores,
+        lineas,
+        compromisoTitulo: document.getElementById('nosotrosCompromisoTitulo').value.trim(),
+        compromisoTexto: document.getElementById('nosotrosCompromisoTexto').value.trim(),
+        compromisoTags,
+        valoresTitleFont: document.getElementById('nosotrosValoresTitleFont')?.value || 'font-sans',
         updatedAt: new Date().toISOString()
     };
     try {
@@ -2564,17 +2618,74 @@ window.saveNosotros = async () => {
 };
 
 let _valorCounter = 0;
-window.addNosotrosValor = (icono = '⭐', texto = '') => {
+window.addNosotrosValor = (icono = 'fas fa-star', texto = '', desc = '', color = '#3b82f6') => {
     _valorCounter++;
     const id = _valorCounter;
     const div = document.createElement('div');
-    div.className = 'nosotros-valor-item flex items-center gap-2';
+    div.className = 'nosotros-valor-item bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2';
     div.id = `valorItem-${id}`;
     div.innerHTML = `
-        <input type="text" value="${icono}" placeholder="⭐" class="valor-icono w-10 bg-white border border-gray-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#00b4d8]">
-        <input type="text" value="${texto}" placeholder="10+ años de experiencia" class="valor-texto flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8]" oninput="updateNosotrosPreview()">
-        <button onclick="document.getElementById('valorItem-${id}').remove();updateNosotrosPreview();" class="w-8 h-8 bg-red-50 text-red-400 hover:bg-red-100 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>`;
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100" style="background:${color}10">
+                <i class="${icono} text-lg" style="color:${color}"></i>
+            </div>
+            <div class="flex-1 space-y-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
+                    <input type="text" value="${texto}" placeholder="Título (Ej. Calidad)" class="valor-texto w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] shadow-sm transition" oninput="updateNosotrosPreview()">
+                    <input type="text" value="${icono}" placeholder="Ícono (ej. fas fa-star)" class="valor-icono w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[12px] font-semibold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] shadow-sm transition" oninput="updateValorPreviewIcon(this)">
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <input type="text" value="${desc}" placeholder="Breve descripción..." class="valor-desc flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-[12px] font-medium text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] shadow-sm transition">
+                    <input type="color" value="${color}" class="valor-color w-9 h-9 rounded-lg border border-gray-200 cursor-pointer flex-shrink-0 p-0 shadow-sm" oninput="updateValorPreviewIcon(this.closest('.nosotros-valor-item').querySelector('.valor-icono'))">
+                    <button onclick="document.getElementById('valorItem-${id}').remove();updateNosotrosPreview();" title="Eliminar valor" class="w-9 h-9 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg flex items-center justify-center text-[13px] transition shadow-sm flex-shrink-0"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `;
     document.getElementById('nosotrosValoresContainer')?.appendChild(div);
+};
+
+let _lineaCounter = 0;
+window.addNosotrosLinea = (icono = 'fas fa-box', titulo = '', desc = '', color = '#3b82f6') => {
+    _lineaCounter++;
+    const id = _lineaCounter;
+    const div = document.createElement('div');
+    div.className = 'nosotros-linea-item bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2';
+    div.id = `lineaItem-${id}`;
+    div.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100" style="background:${color}10">
+                <i class="${icono} text-lg" style="color:${color}"></i>
+            </div>
+            <div class="flex-1 space-y-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
+                    <input type="text" value="${titulo}" placeholder="Título (Ej. Foami)" class="linea-titulo w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-[#00b4d8] shadow-sm transition">
+                    <input type="text" value="${icono}" placeholder="Ícono (ej. fas fa-box)" class="linea-icono w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[12px] font-semibold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] shadow-sm transition" oninput="updateValorPreviewIcon(this)">
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <input type="text" value="${desc}" placeholder="Breve descripción..." class="linea-desc flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-[12px] font-medium text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] shadow-sm transition">
+                    <input type="color" value="${color}" class="linea-color w-9 h-9 rounded-lg border border-gray-200 cursor-pointer flex-shrink-0 p-0 shadow-sm" oninput="updateValorPreviewIcon(this.closest('.nosotros-linea-item').querySelector('.linea-icono'))">
+                    <button onclick="document.getElementById('lineaItem-${id}').remove();" title="Eliminar línea" class="w-9 h-9 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg flex items-center justify-center text-[13px] transition shadow-sm flex-shrink-0"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('nosotrosLineasContainer')?.appendChild(div);
+};
+
+window.updateValorPreviewIcon = (input) => {
+    const item = input.closest('.nosotros-valor-item') || input.closest('.nosotros-linea-item');
+    if (!item) return;
+    const iconEl = item.querySelector('.w-9 i');
+    const colorInput = item.querySelector('[type="color"]');
+    const iconInput = item.querySelector('.valor-icono') || item.querySelector('.linea-icono');
+    if (iconEl && iconInput) {
+        iconEl.className = iconInput.value;
+        if (colorInput) {
+            iconEl.style.color = colorInput.value;
+            iconEl.parentElement.style.background = colorInput.value + '15';
+        }
+    }
 };
 
 window.updateNosotrosPreview = () => {
@@ -2591,12 +2702,13 @@ window.updateNosotrosPreview = () => {
     if (pv) {
         pv.innerHTML = '';
         document.querySelectorAll('.nosotros-valor-item').forEach(row => {
-            const icono = row.querySelector('.valor-icono')?.value || '⭐';
+            const icono = row.querySelector('.valor-icono')?.value || 'fas fa-star';
             const texto = row.querySelector('.valor-texto')?.value || '';
+            const color = row.querySelector('.valor-color')?.value || '#3b82f6';
             if (texto) {
                 const badge = document.createElement('span');
-                badge.className = 'text-[10px] bg-white/10 text-white/80 rounded-full px-2 py-1';
-                badge.textContent = `${icono} ${texto}`;
+                badge.className = 'text-[10px] bg-white/10 text-white/80 rounded-full px-2 py-1 inline-flex items-center gap-1';
+                badge.innerHTML = `<i class="${icono}" style="color:${color}"></i> ${texto}`;
                 pv.appendChild(badge);
             }
         });
