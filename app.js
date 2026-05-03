@@ -6,13 +6,14 @@ import {
 
 // ─── Firebase ────────────────────────────────────────────────────────────────
 const firebaseConfig = {
-    apiKey: "AIzaSyBZdMTsbZ9lMPhHAUrqNW3d86WEc8gLdrI",
-    authDomain: "articulos-redituables-altos.firebaseapp.com",
-    projectId: "articulos-redituables-altos",
-    storageBucket: "articulos-redituables-altos.firebasestorage.app",
-    messagingSenderId: "38804963664",
-    appId: "1:38804963664:web:335c693d68f3bb4eceec55",
-    measurementId: "G-J60MQEZXRQ"
+    apiKey: "AIzaSyC7k98HTOfgUHt0aFbGG6IVoiA5HowCt-k",
+    authDomain: "articulos-redituables.firebaseapp.com",
+    databaseURL: "https://articulos-redituables-default-rtdb.firebaseio.com",
+    projectId: "articulos-redituables",
+    storageBucket: "articulos-redituables.firebasestorage.app",
+    messagingSenderId: "281933269770",
+    appId: "1:281933269770:web:f4c4c4d63e49b6f80ec8f3",
+    measurementId: "G-LVF95RQ4Y7"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -1939,6 +1940,7 @@ let _wixState = {
         annBarFontSize: 10, annBarHeight: 22.5,
         gridCols: 3, gridGap: 16, baseFontSize: 16, letterSpacing: 0, lineHeight: 1.5,
         transitionSpeed: 300, shadowIntensity: 40,
+        avisoTexto: '🚧 Página en construcción — Estamos trabajando para ofrecerte una mejor experiencia. ¡Pronto disponible!',
     },
     toggles: {
         headerShadow: false, headerSticky: true, heroAutoplay: true, heroArrows: true,
@@ -1953,6 +1955,8 @@ let _wixState = {
         footerGradDir: '135deg', annBarGradDir: '90deg', accentGradDir: '135deg',
         // Button shape toggles
         pillButtons: false, flatSearch: false, boldTitles: false,
+        // Aviso banner (página en construcción)
+        showAviso: false,
     },
     font: "'Outfit', sans-serif",
     borderRadius: '8px',
@@ -2226,6 +2230,16 @@ function _wixPopulateUI(data) {
         const area = document.getElementById('editorAnnTexts');
         if (area) area.value = data.sliders.annTexts;
     }
+    // Aviso de producción
+    if (data.sliders && data.sliders.avisoTexto !== undefined) {
+        const avisoInput = document.getElementById('editorAvisoTexto');
+        if (avisoInput) avisoInput.value = data.sliders.avisoTexto;
+    }
+    // Show/hide aviso text wrap based on toggle state
+    if (data.toggles && data.toggles.showAviso !== undefined) {
+        const wrap = document.getElementById('avisoTextoWrap');
+        if (wrap) wrap.style.display = data.toggles.showAviso ? 'block' : 'none';
+    }
     // Restore gradient control panels and previews
     const gradElements = ['btn', 'body', 'header', 'footer', 'annBar', 'accent'];
     gradElements.forEach(el => {
@@ -2354,12 +2368,12 @@ function convertToEmbedUrl(raw) {
     // Embed via place name/address query as fallback
     const qMatch = raw.match(/[?&]q=([^&]+)/);
     if (qMatch) {
-        return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBZdMTsbZ9lMPhHAUrqNW3d86WEc8gLdrI&q=${qMatch[1]}`;
+        return `https://www.google.com/maps/embed/v1/place?key=AIzaSyC7k98HTOfgUHt0aFbGG6IVoiA5HowCt-k&q=${qMatch[1]}`;
     }
     // Extract search query from /place/ path
     const placeMatch = raw.match(/\/place\/([^/@?]+)/);
     if (placeMatch) {
-        return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBZdMTsbZ9lMPhHAUrqNW3d86WEc8gLdrI&q=${placeMatch[1]}`;
+        return `https://www.google.com/maps/embed/v1/place?key=AIzaSyC7k98HTOfgUHt0aFbGG6IVoiA5HowCt-k&q=${placeMatch[1]}`;
     }
     return raw; // return as-is if unknown
 }
