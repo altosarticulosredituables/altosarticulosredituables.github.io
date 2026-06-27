@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin — Altos Artículos</title>
+    <title>Admin — Artículos Redituables</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -17,43 +17,42 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
         :root {
-            --sidebar-w: 255px;
+            --sidebar-w: 260px;
 
-            /* ── Paleta principal ── */
-            --accent:       #6366f1;   /* indigo principal */
-            --accent-dk:    #4f46e5;
-            --accent-glow:  rgba(99, 102, 241, 0.2);
+            /* ── Paleta principal (Neón Cyan/Púrpura) ── */
+            --accent:       #00f0ff;
+            --accent-dk:    #00c3ff;
+            --accent-glow:  rgba(0, 240, 255, 0.4);
 
-            /* ── Colores de acento secundarios por sección ── */
-            --teal:   #14b8a6;
-            --violet: #8b5cf6;
-            --rose:   #f43f5e;
-            --amber:  #f59e0b;
-            --sky:    #0ea5e9;
-            --emerald:#10b981;
+            /* ── Colores de acento secundarios ── */
+            --teal:   #00f0ff;
+            --violet: #b535f6;
+            --rose:   #ff2a5f;
+            --amber:  #ffb800;
+            --sky:    #00c3ff;
+            --emerald:#00ff9d;
 
-            /* ── Sidebar: fondo casi negro azulado ── */
-            --sidebar-bg:     #0f1117;
-            --sidebar-border: rgba(255,255,255,0.07);
-            --header-bg:      #0f1117;
-
-            /* ── Superficies ── */
-            --surface:   #ffffff;
-            --surface-2: #f9fafb;
-            --border:    #e5e9f0;
+            /* ── Superficies (Oscuras / Glass) ── */
+            --bg-body:        #06080d;
+            --sidebar-bg:     rgba(10, 14, 23, 0.65);
+            --sidebar-border: rgba(255, 255, 255, 0.05);
+            --header-bg:      rgba(10, 14, 23, 0.65);
+            
+            --surface:        rgba(15, 20, 32, 0.7);
+            --surface-2:      rgba(25, 30, 45, 0.8);
+            --border:         rgba(255, 255, 255, 0.08);
 
             /* ── Texto ── */
-            --text-primary:   #111827;
-            --text-secondary: #6b7280;
-            --text-muted:     #9ca3af;
+            --text-primary:   #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted:     #475569;
 
             /* ── Radios y sombras ── */
-            --radius-card: 16px;
-            --radius-btn:  10px;
-            --shadow-card:       0 1px 4px rgba(17,24,39,0.05), 0 1px 2px rgba(17,24,39,0.04);
-            --shadow-card-hover: 0 10px 32px rgba(17,24,39,0.09), 0 2px 8px rgba(17,24,39,0.05);
+            --radius-card: 18px;
+            --radius-btn:  12px;
+            --shadow-card:       0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+            --shadow-card-hover: 0 12px 48px rgba(0, 240, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.1);
         }
-
 
         * {
             font-family: 'Outfit', 'Inter', sans-serif;
@@ -63,32 +62,33 @@
         }
 
         body {
-            background: #f4f6fb;
-            background-image:
-                radial-gradient(ellipse at 15% 0%, rgba(99,102,241,0.06) 0%, transparent 55%),
-                radial-gradient(ellipse at 85% 95%, rgba(20,184,166,0.05) 0%, transparent 55%);
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(ellipse at 10% 0%, rgba(181, 53, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(ellipse at 90% 90%, rgba(0, 240, 255, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(10, 14, 23, 1) 0%, rgba(6, 8, 13, 1) 100%);
+            background-attachment: fixed;
             color: var(--text-primary);
             min-height: 100vh;
         }
 
-
         /* ─── Scrollbar ─────────────────────────────────── */
         ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: transparent;
+            background: rgba(0,0,0,0.2);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #d1d9e6;
+            background: rgba(255,255,255,0.1);
             border-radius: 8px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: rgba(255,255,255,0.2);
         }
 
         /* ─── Sidebar ────────────────────────────────────── */
@@ -98,8 +98,10 @@
             min-width: var(--sidebar-w);
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid var(--sidebar-border);
-            box-shadow: 4px 0 32px rgba(0, 0, 0, 0.25);
+            box-shadow: 4px 0 32px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             /* position is controlled by Tailwind: fixed on mobile, relative on md+ */
         }
@@ -124,7 +126,7 @@
             left: -60px;
             width: 280px;
             height: 280px;
-            background: radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 65%);
+            background: radial-gradient(circle, rgba(181, 53, 246, 0.25) 0%, transparent 65%);
             pointer-events: none;
             animation: sidebarGlow 9s ease-in-out infinite alternate;
         }
@@ -218,8 +220,8 @@
 
         .sidebar-item.active {
             color: #ffffff;
-            background: linear-gradient(90deg, rgba(99,102,241,0.22) 0%, rgba(99,102,241,0.06) 100%);
-            border-color: rgba(99,102,241,0.3);
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.22) 0%, rgba(0, 240, 255, 0.06) 100%);
+            border-color: rgba(0, 240, 255, 0.3);
         }
 
         .sidebar-item.active i {
@@ -227,18 +229,7 @@
         }
 
 
-        .sidebar-item.active::before {
-            content: '';
-            position: absolute;
-            left: -9px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 62%;
-            background: var(--accent);
-            border-radius: 0 3px 3px 0;
-            box-shadow: 0 0 10px var(--accent);
-        }
+
 
 
         .sidebar-item:not(.active):hover {
@@ -352,15 +343,16 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.2);
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
             border-radius: 100px;
             padding: 5px 12px;
             font-size: 10px;
             font-weight: 700;
-            color: #4ade80;
+            color: #00ff9d;
             letter-spacing: 0.08em;
             text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.1);
         }
 
         .topbar-avatar {
@@ -369,107 +361,134 @@
             border-radius: 10px;
             border: 2px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
             cursor: pointer;
         }
 
         .topbar-avatar:hover {
             border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
         /* ─── Stat Cards con color propio por tipo ─────── */
         .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: #ffffff;
             border-radius: var(--radius-card);
-            padding: 20px 18px;
-            transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: var(--shadow-card);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             position: relative;
             overflow: hidden;
+            z-index: 1;
         }
-
-        /* Barra de color superior por variante */
-        .stat-card[data-color="indigo"]  { border-top: 3px solid #6366f1; }
-        .stat-card[data-color="teal"]    { border-top: 3px solid #14b8a6; }
-        .stat-card[data-color="rose"]    { border-top: 3px solid #f43f5e; }
-        .stat-card[data-color="amber"]   { border-top: 3px solid #f59e0b; }
-        .stat-card[data-color="violet"]  { border-top: 3px solid #8b5cf6; }
-        .stat-card[data-color="sky"]     { border-top: 3px solid #0ea5e9; }
-        .stat-card[data-color="emerald"] { border-top: 3px solid #10b981; }
-
-        .stat-card::after {
+        
+        .stat-card::before {
             content: '';
             position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            opacity: 0;
-            transition: opacity 0.3s;
-            background: linear-gradient(135deg, rgba(99,102,241,0.03) 0%, rgba(20,184,166,0.03) 100%);
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 1;
         }
 
-        .stat-card:hover {
-            transform: translateY(-3px) scale(1.005);
-            box-shadow: var(--shadow-card-hover);
-        }
+        /* Colores mega-iluminados por variante */
+        .stat-card[data-color="indigo"] { border: 1px solid #a5b4fc; box-shadow: 0 0 35px rgba(99, 102, 241, 0.3); }
+        .stat-card[data-color="indigo"]::before { background: radial-gradient(circle at 100% 50%, rgba(99, 102, 241, 0.4) 0%, rgba(99, 102, 241, 0.1) 50%, transparent 85%); }
+        
+        .stat-card[data-color="teal"] { border: 1px solid #5eead4; box-shadow: 0 0 35px rgba(20, 184, 166, 0.3); }
+        .stat-card[data-color="teal"]::before { background: radial-gradient(circle at 100% 50%, rgba(20, 184, 166, 0.4) 0%, rgba(20, 184, 166, 0.1) 50%, transparent 85%); }
+        
+        .stat-card[data-color="rose"] { border: 1px solid #fda4af; box-shadow: 0 0 35px rgba(244, 63, 94, 0.3); }
+        .stat-card[data-color="rose"]::before { background: radial-gradient(circle at 100% 50%, rgba(244, 63, 94, 0.4) 0%, rgba(244, 63, 94, 0.1) 50%, transparent 85%); }
+        
+        .stat-card[data-color="amber"] { border: 1px solid #fcd34d; box-shadow: 0 0 35px rgba(245, 158, 11, 0.3); }
+        .stat-card[data-color="amber"]::before { background: radial-gradient(circle at 100% 50%, rgba(245, 158, 11, 0.4) 0%, rgba(245, 158, 11, 0.1) 50%, transparent 85%); }
+        
+        .stat-card[data-color="violet"] { border: 1px solid #c4b5fd; box-shadow: 0 0 35px rgba(139, 92, 246, 0.3); }
+        .stat-card[data-color="violet"]::before { background: radial-gradient(circle at 100% 50%, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.1) 50%, transparent 85%); }
+        
+        .stat-card[data-color="sky"] { border: 1px solid #7dd3fc; box-shadow: 0 0 35px rgba(14, 165, 233, 0.3); }
+        .stat-card[data-color="sky"]::before { background: radial-gradient(circle at 100% 50%, rgba(14, 165, 233, 0.4) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 85%); }
+        
+        .stat-card[data-color="emerald"] { border: 1px solid #6ee7b7; box-shadow: 0 0 35px rgba(16, 185, 129, 0.3); }
+        .stat-card[data-color="emerald"]::before { background: radial-gradient(circle at 100% 50%, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.1) 50%, transparent 85%); }
 
-        .stat-card:hover::after { opacity: 1; }
+        .stat-card:hover { transform: translateY(-5px) scale(1.02); }
+        .stat-card:hover::before { opacity: 1; transform: scale(1.3); }
 
         .stat-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 11px;
+            font-size: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 15px;
             flex-shrink: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
         }
 
-        /* Iconos coloridos por variante */
-        .stat-icon.indigo  { background: #eef2ff; color: #6366f1; }
-        .stat-icon.teal    { background: #f0fdfa; color: #14b8a6; }
-        .stat-icon.rose    { background: #fff1f2; color: #f43f5e; }
-        .stat-icon.amber   { background: #fffbeb; color: #f59e0b; }
-        .stat-icon.violet  { background: #f5f3ff; color: #8b5cf6; }
-        .stat-icon.sky     { background: #f0f9ff; color: #0ea5e9; }
-        .stat-icon.emerald { background: #ecfdf5; color: #10b981; }
+        .stat-card:hover .stat-icon { transform: scale(1.15) rotate(5deg); }
+
+        /* Iconos con brillo EXTREMO */
+        .stat-icon.indigo  { color: #6366f1; filter: drop-shadow(0 0 15px rgba(99,102,241,1)) drop-shadow(0 0 40px rgba(99,102,241,0.8)); }
+        .stat-icon.teal    { color: #14b8a6; filter: drop-shadow(0 0 15px rgba(20,184,166,1)) drop-shadow(0 0 40px rgba(20,184,166,0.8)); }
+        .stat-icon.rose    { color: #f43f5e; filter: drop-shadow(0 0 15px rgba(244,63,94,1)) drop-shadow(0 0 40px rgba(244,63,94,0.8)); }
+        .stat-icon.amber   { color: #f59e0b; filter: drop-shadow(0 0 15px rgba(245,158,11,1)) drop-shadow(0 0 40px rgba(245,158,11,0.8)); }
+        .stat-icon.violet  { color: #8b5cf6; filter: drop-shadow(0 0 15px rgba(139,92,246,1)) drop-shadow(0 0 40px rgba(139,92,246,0.8)); }
+        .stat-icon.sky     { color: #0ea5e9; filter: drop-shadow(0 0 15px rgba(14,165,233,1)) drop-shadow(0 0 40px rgba(14,165,233,0.8)); }
+        .stat-icon.emerald { color: #10b981; filter: drop-shadow(0 0 15px rgba(16,185,129,1)) drop-shadow(0 0 40px rgba(16,185,129,0.8)); }
+        
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .stat-info .stat-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+        }
+        .stat-info .stat-value {
+            font-size: 34px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1;
+        }
 
 
 
         /* ─── Botones ────────────────────────────────────── */
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dk) 100%);
-            color: #fff;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent);
             font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
+            font-weight: 800;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             padding: 10px 20px;
             border-radius: var(--radius-btn);
-            border: none;
+            border: 1px solid rgba(0, 240, 255, 0.3);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 7px;
             transition: all 0.22s ease;
-            box-shadow: 0 3px 12px rgba(99,102,241,0.35);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
             position: relative;
             overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 55%);
+            backdrop-filter: blur(10px);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99,102,241,0.45);
-            filter: brightness(1.07);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.2);
+            border-color: rgba(0, 240, 255, 0.6);
         }
 
         .btn-primary:active { transform: translateY(0); }
@@ -477,7 +496,8 @@
 
 
         .btn-black {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: rgba(15, 20, 32, 0.6);
+            backdrop-filter: blur(10px);
             color: #fff;
             font-size: 12px;
             font-weight: 700;
@@ -490,8 +510,8 @@
             justify-content: center;
             gap: 8px;
             border-radius: var(--radius-btn);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             cursor: pointer;
             position: relative;
             overflow: hidden;
@@ -856,37 +876,7 @@
             }
         }
 
-        /* ── Scanner line en header ── */
-        .header-scanner {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: linear-gradient(180deg, transparent, var(--accent), transparent);
-            opacity: 0.4;
-            animation: scannerY 3s ease-in-out infinite;
-        }
 
-        @keyframes scannerY {
-            0% {
-                left: 0%;
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 0.5;
-            }
-
-            90% {
-                opacity: 0.5;
-            }
-
-            100% {
-                left: 100%;
-                opacity: 0;
-            }
-        }
 
         /* ── Shimmer en stat cards al cargar ── */
         @keyframes shimmerMove {
@@ -1050,29 +1040,7 @@
             pointer-events: none;
         }
 
-        /* ── Background body: grid sutil animado ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(0, 180, 216, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 180, 216, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-            z-index: 0;
-            animation: gridDrift 20s linear infinite;
-        }
-
-        @keyframes gridDrift {
-            from {
-                background-position: 0 0;
-            }
-
-            to {
-                background-position: 40px 40px;
-            }
-        }
+        /* (Grid background removed per user request) */
 
         /* ── Asegura que el contenido va encima del grid ── */
         .flex.h-screen {
@@ -1391,7 +1359,7 @@
                     <img id="adminSidebarLogo" src="logo.png" alt="Altos Logo"
                         class="w-full h-full object-contain p-1.5" onerror="this.src='logo.jpg'">
                 </div>
-                <p class="sidebar-title">Altos Artículos</p>
+                <p class="sidebar-title">Artículos Redituables</p>
                 <p class="sidebar-subtitle">Inventario &amp; Gestión</p>
             </div>
 
@@ -1456,7 +1424,7 @@
 
             <!-- Top Bar -->
             <header id="topbar">
-                <div class="header-scanner"></div>
+
                 <div class="topbar-breadcrumb">
                     <button onclick="toggleSidebar()"
                         class="md:hidden text-white hover:text-gray-400 transition-colors mr-2">
@@ -1489,51 +1457,46 @@
                     <!-- ══ STATS ROW ══════════════════════════════════════════ -->
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Total Artículos -->
-                        <div
-                            class="bg-gradient-to-br from-[#0f172a] to-[#020617] text-white rounded-[20px] px-6 py-5 flex items-center gap-4 shadow-md shadow-slate-200/50">
-                            <div
-                                class="w-11 h-11 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-box text-[16px]"></i>
+                        <div class="stat-card" data-color="sky">
+                            <div class="stat-info">
+                                <span class="stat-title">Artículos</span>
+                                <span id="dashTotal" class="stat-value">—</span>
                             </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Artículos</p>
-                                <h3 id="dashTotal" class="text-3xl font-black leading-none mt-1 text-white">—</h3>
+                            <div class="stat-icon sky">
+                                <i class="fas fa-box"></i>
                             </div>
                         </div>
+                        
                         <!-- Pedidos -->
-                        <div
-                            class="bg-white border border-slate-200/60 rounded-[20px] px-6 py-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-                            <div
-                                class="w-11 h-11 bg-gradient-to-br from-[#0f172a] to-[#020617] rounded-xl flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-shopping-bag text-[16px] text-white"></i>
+                        <div class="stat-card" data-color="violet">
+                            <div class="stat-info">
+                                <span class="stat-title">Pedidos</span>
+                                <span id="dashOrders" class="stat-value">—</span>
                             </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Pedidos</p>
-                                <h3 id="dashOrders" class="text-3xl font-black text-slate-900 leading-none mt-1">—</h3>
+                            <div class="stat-icon violet">
+                                <i class="fas fa-shopping-bag"></i>
                             </div>
                         </div>
+                        
                         <!-- Clientes -->
-                        <div
-                            class="bg-white border border-slate-200/60 rounded-[20px] px-6 py-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-                            <div
-                                class="w-11 h-11 bg-gradient-to-br from-[#00b4d8] to-[#0077b6] rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#00b4d8]/20">
-                                <i class="fas fa-users text-[16px] text-white"></i>
+                        <div class="stat-card" data-color="teal">
+                            <div class="stat-info">
+                                <span class="stat-title">Clientes</span>
+                                <span id="dashClients" class="stat-value">—</span>
                             </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Clientes</p>
-                                <h3 id="dashClients" class="text-3xl font-black text-slate-900 leading-none mt-1">—</h3>
+                            <div class="stat-icon teal">
+                                <i class="fas fa-users"></i>
                             </div>
                         </div>
+                        
                         <!-- Categorías -->
-                        <div
-                            class="bg-white border border-slate-200/60 rounded-[20px] px-6 py-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-                            <div
-                                class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/20">
-                                <i class="fas fa-tags text-[16px] text-white"></i>
+                        <div class="stat-card" data-color="rose">
+                            <div class="stat-info">
+                                <span class="stat-title">Categorías</span>
+                                <span id="dashCats" class="stat-value">—</span>
                             </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Categorías</p>
-                                <h3 id="dashCats" class="text-3xl font-black text-slate-900 leading-none mt-1">—</h3>
+                            <div class="stat-icon rose">
+                                <i class="fas fa-tags"></i>
                             </div>
                         </div>
                     </div>
@@ -2030,7 +1993,7 @@
                             <div class="panel p-5 space-y-3">
                                 <h4 class="text-sm font-black text-gray-700 uppercase tracking-wider">Vista Previa</h4>
                                 <div class="bg-gradient-to-br from-[#0a0a0a] to-[#0d1b2a] rounded-2xl p-5 text-white">
-                                    <p id="previewTitulo" class="text-base font-black leading-tight">Altos Artículos</p>
+                                    <p id="previewTitulo" class="text-base font-black leading-tight">Artículos Redituables</p>
                                     <p id="previewLema" class="text-xs text-white/50 mt-1">Tu mayorista de confianza</p>
                                     <div class="h-px bg-white/10 my-3"></div>
                                     <p id="previewDesc" class="text-xs text-white/70 leading-relaxed">Escribe tu
@@ -2291,7 +2254,7 @@
                                 style="background:#0a0a0a; border: 2px solid #00b4d8">Vista Previa</div>
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest" id="themePreviewTitle"
-                                    style="color:#ffffff">Altos Artículos</p>
+                                    style="color:#ffffff">Artículos Redituables</p>
                                 <p class="text-[10px] mt-0.5" id="themePreviewSub" style="color:rgba(255,255,255,0.4)">
                                     Catálogo Mayorista</p>
                             </div>
@@ -5317,5 +5280,6 @@ function closeBanner(){
 </body>
 
 </html>
+
 
 
