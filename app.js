@@ -165,6 +165,81 @@ const USO_CFDI_MAP = {
     'D10': 'Servicios educativos', 'S01': 'Sin efectos fiscales', 'CP01': 'Pagos', 'CN01': 'Nómina'
 };
 
+window.verTicketImagen = function(e, url) {
+    e.preventDefault();
+    if (!url || url === 'undefined' || url === 'null') return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4 cursor-pointer backdrop-blur-sm transition-opacity duration-300 opacity-0';
+    
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'max-w-full max-h-full rounded-xl shadow-2xl transform scale-95 transition-transform duration-300 cursor-default';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '<i class="fas fa-times text-2xl"></i>';
+    closeBtn.className = 'absolute top-4 right-4 text-white hover:text-gray-300 w-10 h-10 flex items-center justify-center bg-black/50 rounded-full cursor-pointer z-[10000]';
+    
+    overlay.appendChild(img);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+    
+    requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        img.classList.remove('scale-95');
+    });
+    
+    const close = (evt) => {
+        if (evt && evt.target === img) return;
+        overlay.classList.add('opacity-0');
+        img.classList.add('scale-95');
+        setTimeout(() => overlay.remove(), 300);
+    };
+    
+    overlay.addEventListener('click', close);
+    closeBtn.addEventListener('click', close);
+};
+
+window.verFacturaPDF = function(e, url) {
+    if (e) e.preventDefault();
+    if (!url || url === 'undefined' || url === 'null') return;
+    
+    let finalUrl = url;
+    if(finalUrl.includes('fl_attachment/v')) {
+        finalUrl = finalUrl.replace('fl_attachment/v', 'v');
+    } else if (finalUrl.includes('fl_attachment/')) {
+        finalUrl = finalUrl.replace('fl_attachment/', '');
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300 opacity-0';
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = finalUrl;
+    iframe.className = 'w-full max-w-4xl h-[85vh] bg-white rounded-xl shadow-2xl transform scale-95 transition-transform duration-300';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '<i class="fas fa-times text-xl"></i>';
+    closeBtn.className = 'absolute top-4 right-4 text-white hover:text-gray-300 w-10 h-10 flex items-center justify-center bg-black/50 rounded-full cursor-pointer z-[10000]';
+    
+    overlay.appendChild(iframe);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+    
+    requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        iframe.classList.remove('scale-95');
+    });
+    
+    const close = () => {
+        overlay.classList.add('opacity-0');
+        iframe.classList.add('scale-95');
+        setTimeout(() => overlay.remove(), 300);
+    };
+    
+    closeBtn.addEventListener('click', close);
+};
+
 window.loadFacturas = async () => {
     const tbody = document.getElementById('facturasTableBody');
     if (!tbody) return;
@@ -201,7 +276,7 @@ window.loadFacturas = async () => {
                     <p>CP: ${f.cp} | Reg: ${f.regimenFiscal} - ${REGIMENES_MAP[f.regimenFiscal] || 'Desconocido'} | Uso: ${f.usoCfdi} - ${USO_CFDI_MAP[f.usoCfdi] || 'Desconocido'}</p>
                 </td>
                 <td class="px-6 py-4">
-                    <a href="${f.ticketUrl || '#'}" target="_blank" onclick="return confirm('¿Deseas abrir la imagen/archivo del ticket subida por este cliente?');" class="w-8 h-8 flex flex-col items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition group relative ${!f.ticketUrl ? 'opacity-50 pointer-events-none' : ''}" title="Ver Ticket">
+                    <a href="#" onclick="window.verTicketImagen(event, '${f.ticketUrl}');" class="w-8 h-8 flex flex-col items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition group relative ${!f.ticketUrl ? 'opacity-50 pointer-events-none' : ''}" title="Ver Ticket">
                         <i class="fas fa-image"></i>
                     </a>
                 </td>
@@ -209,7 +284,7 @@ window.loadFacturas = async () => {
                 <td class="px-6 py-4">
                     ${f.status === 'Pendiente' ? 
                         `<button onclick="completarFactura('${f.id}')" class="bg-black hover:bg-gray-800 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-lg transition"><i class="fas fa-upload mr-1"></i> Subir Factura PDF</button>`
-                        : `<span class="text-xs text-green-600 font-bold"><i class="fas fa-check"></i> Lista</span>`
+                        : `<div class="flex items-center gap-2"><span class="text-xs text-green-600 font-bold"><i class="fas fa-check"></i> Lista</span> <button onclick="window.verFacturaPDF(event, '${f.facturaUrl}')" class="bg-green-50 hover:bg-green-100 text-green-700 text-[10px] font-black uppercase px-2 py-1 rounded-md transition" title="Ver Factura PDF"><i class="fas fa-eye mr-1"></i> Ver</button></div>`
                     }
                 </td>
             </tr>
@@ -2703,7 +2778,7 @@ window.updateValorPreviewIcon = (input) => {
 };
 
 window.updateNosotrosPreview = () => {
-    const t = document.getElementById('nosotrosTitulo')?.value || 'Altos Artículos';
+    const t = document.getElementById('nosotrosTitulo')?.value || 'Artículos Redituables';
     const l = document.getElementById('nosotrosLema')?.value || 'Tu mayorista de confianza';
     const d = document.getElementById('nosotrosDescripcion')?.value || 'Escribe tu descripción aquí...';
     const pt = document.getElementById('previewTitulo');
